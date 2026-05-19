@@ -4,7 +4,6 @@ NeuroCI — Patch Validator Tests.
 Tests for unified diff application and multi-language syntax validation.
 """
 
-import pytest
 
 from src.agent.validator import (
     apply_unified_diff,

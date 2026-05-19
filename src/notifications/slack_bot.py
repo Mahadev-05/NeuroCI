@@ -9,6 +9,8 @@ Sends rich interactive Slack messages:
 
 from __future__ import annotations
 
+from typing import Any
+
 import structlog
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -57,7 +59,7 @@ async def send_fix_notification(state: AgentState, dry_run: bool = False) -> Non
     if dry_run:
         title_text = "🧪 [DRY RUN] NeuroCI — Fix Generated"
 
-    blocks = [
+    blocks: list[dict[str, Any]] = [
         {
             "type": "header",
             "text": {"type": "plain_text", "text": title_text, "emoji": True},
@@ -136,7 +138,7 @@ async def send_escalation(state: AgentState, reason: str) -> None:
 
     settings = get_settings()
 
-    blocks = [
+    blocks: list[dict[str, Any]] = [
         {
             "type": "header",
             "text": {"type": "plain_text", "text": "⚠️ NeuroCI — Manual Attention Needed"},
@@ -177,6 +179,7 @@ async def send_pr_created(state: AgentState, pr_url: str) -> None:
 
     settings = get_settings()
     patch = state.patch
+    confidence = patch.confidence if patch else 0.0
 
     try:
         client.chat_postMessage(
@@ -184,7 +187,7 @@ async def send_pr_created(state: AgentState, pr_url: str) -> None:
             text=(
                 f"✅ *NeuroCI auto-created PR* for `{state.repo_full_name}`\n"
                 f"Category: `{state.category.value}` | "
-                f"Confidence: {patch.confidence:.0%}\n"
+                f"Confidence: {confidence:.0%}\n"
                 f"<{pr_url}|View Pull Request>"
             ),
         )

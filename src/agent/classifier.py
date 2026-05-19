@@ -16,10 +16,9 @@ import structlog
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.llm_factory import get_chat_llm
-
+from src.agent.prompts import CLASSIFICATION_SYSTEM_PROMPT, CLASSIFICATION_USER_PROMPT
 from src.config import get_settings
 from src.models import AgentState, FailureCategory
-from src.agent.prompts import CLASSIFICATION_SYSTEM_PROMPT, CLASSIFICATION_USER_PROMPT
 
 logger = structlog.get_logger()
 
@@ -31,7 +30,7 @@ async def classify_failure(state: AgentState) -> AgentState:
     Uses a fast LLM call with structured output.
     Updates state.category with the classification result.
     """
-    settings = get_settings()
+    get_settings()
 
     if not state.parsed_error:
         logger.warning("classifier.no_parsed_error", run_id=state.run_id)

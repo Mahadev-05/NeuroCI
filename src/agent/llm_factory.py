@@ -15,8 +15,8 @@ from __future__ import annotations
 from typing import Literal
 
 import structlog
-from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.embeddings import Embeddings
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from src.config import get_settings
 

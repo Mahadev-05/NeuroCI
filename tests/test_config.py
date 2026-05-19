@@ -3,7 +3,6 @@ NeuroCI — Configuration Tests.
 
 Tests for settings loading, validators, and helpers.
 """
-import pytest
 from unittest.mock import patch
 
 

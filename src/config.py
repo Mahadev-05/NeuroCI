@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -129,7 +129,7 @@ class Settings(BaseSettings):
         return any(file_path.startswith(rp) or file_path.endswith(rp) for rp in self.restricted_paths_list)
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Cached singleton for application settings."""
     return Settings()  # type: ignore[call-arg]

@@ -63,9 +63,9 @@ def process_failure(self, state_dict: dict[str, Any]) -> dict[str, Any]:
     Receives the AgentState as a dict (serialized by the webhook receiver).
     Returns the final state dict with repair results.
     """
-    from src.models import AgentState
     from src.agent.repair_agent import run_repair_pipeline
     from src.metrics.prometheus import ACTIVE_REPAIRS
+    from src.models import AgentState
 
     ACTIVE_REPAIRS.inc()
 
@@ -121,8 +121,9 @@ def apply_approved_fix(run_id_str: str) -> dict[str, str]:
             return {"status": "error", "message": "No cached state found"}
 
         import json
-        from src.models import AgentState
+
         from src.agent.repair_agent import _create_fix_pr
+        from src.models import AgentState
         from src.pipeline.github_client import GitHubClient
 
         state = AgentState(**json.loads(cached))

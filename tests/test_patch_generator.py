@@ -4,9 +4,11 @@ NeuroCI — Patch Generator Tests.
 Tests for CoT patch generation and retry logic with mocked LLM.
 """
 import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
-from src.models import AgentState, ParsedError, FailureCategory, SimilarFix
+
+from src.models import AgentState, FailureCategory, ParsedError, SimilarFix
 
 
 def _make_state() -> AgentState:
@@ -35,7 +37,8 @@ class TestPatchGenerator:
             "target_file": "src/main.py", "lines_changed": 1,
         })
         with patch("src.agent.patch_generator.get_chat_llm") as m:
-            inst = MagicMock(); inst.ainvoke = AsyncMock(return_value=resp)
+            inst = MagicMock()
+            inst.ainvoke = AsyncMock(return_value=resp)
             m.return_value = inst
             from src.agent.patch_generator import generate_patch
             result = await generate_patch(_make_state())
@@ -61,7 +64,8 @@ class TestPatchGenerator:
             "lines_changed": 1, "pr_description": "retry fix",
         })
         with patch("src.agent.patch_generator.get_chat_llm") as m:
-            inst = MagicMock(); inst.ainvoke = AsyncMock(return_value=resp)
+            inst = MagicMock()
+            inst.ainvoke = AsyncMock(return_value=resp)
             m.return_value = inst
             from src.agent.patch_generator import retry_patch
             state = _make_state()

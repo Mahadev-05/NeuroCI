@@ -13,7 +13,7 @@ from __future__ import annotations
 import time
 
 import structlog
-from prometheus_client import Counter, Histogram, Gauge, Info
+from prometheus_client import Counter, Gauge, Histogram, Info
 
 from src.models import AgentState
 

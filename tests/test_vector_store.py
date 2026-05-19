@@ -3,8 +3,9 @@ NeuroCI — Vector Store Tests.
 
 Tests for ChromaDB vector store with mocked client.
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 
 
 class TestVectorStore:

@@ -7,8 +7,7 @@ All data models for webhook payloads, agent state, patches, and API responses.
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
-from typing import Any
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +15,7 @@ from pydantic import BaseModel, Field
 # ═══════════════════════════════════════════════════════════
 # Failure Categories — the 10 canonical types
 # ═══════════════════════════════════════════════════════════
-class FailureCategory(str, Enum):
+class FailureCategory(StrEnum):
     IMPORT_ERROR = "ImportError"
     DEPENDENCY_VERSION_CONFLICT = "DependencyVersionConflict"
     TEST_ASSERTION = "TestAssertion"

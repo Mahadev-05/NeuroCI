@@ -3,9 +3,11 @@ NeuroCI — Slack Bot Tests.
 
 Tests for Slack notification functions with mocked SDK.
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from src.models import AgentState, PatchResult, ParsedError, FailureCategory
+
+from src.models import AgentState, FailureCategory, ParsedError, PatchResult
 
 
 def _make_state() -> AgentState:

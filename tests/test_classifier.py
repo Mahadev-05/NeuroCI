@@ -5,10 +5,11 @@ Tests for LLM failure classification with mocked LLM responses.
 """
 
 import json
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.models import AgentState, ParsedError, FailureCategory
+import pytest
+
+from src.models import AgentState, FailureCategory, ParsedError
 
 
 class TestClassifier:

@@ -3,13 +3,13 @@ NeuroCI — Metrics Tests.
 
 Tests for Prometheus metrics and stage timing.
 """
-import pytest
-from unittest.mock import MagicMock
-from src.models import AgentState, RepairResult, PatchResult, FailureCategory
 from src.metrics.prometheus import (
-    track_repair_attempt, track_webhook, StageTimer,
-    setup_metrics, FIXES_TOTAL, WEBHOOKS_RECEIVED,
+    StageTimer,
+    setup_metrics,
+    track_repair_attempt,
+    track_webhook,
 )
+from src.models import AgentState, FailureCategory, PatchResult, RepairResult
 
 
 class TestMetrics:

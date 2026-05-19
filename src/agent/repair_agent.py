@@ -11,26 +11,27 @@ from __future__ import annotations
 
 import json
 import time
+from typing import Any
 
 import redis as redis_lib
 import structlog
 
-from src.config import get_settings
-from src.models import AgentState, FailureCategory, RepairResult
-from src.pipeline.log_parser import extract_and_parse_logs
-from src.pipeline.github_client import GitHubClient
 from src.agent.classifier import classify_failure
-from src.agent.patch_generator import generate_patch, retry_patch
 from src.agent.debate import debate_and_select
+from src.agent.patch_generator import generate_patch, retry_patch
 from src.agent.validator import validate_patch
+from src.config import get_settings
 from src.memory.vector_store import VectorStore
-from src.policy.opa_client import evaluate_policy
-from src.notifications.slack_bot import send_fix_notification, send_escalation, send_pr_created
 from src.metrics.prometheus import (
-    track_repair_attempt,
-    StageTimer,
     MTTR_HISTOGRAM,
+    StageTimer,
+    track_repair_attempt,
 )
+from src.models import AgentState, FailureCategory, RepairResult
+from src.notifications.slack_bot import send_escalation, send_fix_notification, send_pr_created
+from src.pipeline.github_client import GitHubClient
+from src.pipeline.log_parser import extract_and_parse_logs
+from src.policy.opa_client import evaluate_policy
 
 logger = structlog.get_logger()
 
@@ -78,7 +79,7 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
         import hashlib
         error_hash = hashlib.md5(state.parsed_error.raw_log.encode("utf-8")).hexdigest()
         logger.info("repair.check_signature", run_id=state.run_id, error_hash=error_hash)
-        
+
         try:
             r = redis_lib.from_url(settings.redis_url)
             dup_data_raw = r.get(f"neuroci:signature:{error_hash}")
@@ -87,7 +88,7 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                 pr_number = dup_data.get("pr_number")
                 pr_url = dup_data.get("pr_url")
                 logger.info("repair.signature_duplicate", run_id=state.run_id, error_hash=error_hash, pr_number=pr_number)
-                
+
                 # Post comment to the existing PR
                 comment_body = (
                     f"⚠️ **NeuroCI Note**: The same error signature was detected again in a new workflow run.\n"
@@ -100,7 +101,7 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                     logger.info("repair.duplicate_comment_posted", run_id=state.run_id, pr_number=pr_number)
                 except Exception as comment_err:
                     logger.warning("repair.duplicate_comment_failed", error=str(comment_err))
-                
+
                 state.result = RepairResult(
                     success=True,
                     action_taken="skipped",

@@ -19,12 +19,12 @@ from pathlib import Path
 import pytest
 
 from src.pipeline.log_parser import (
+    detect_language,
+    extract_stack_trace,
+    find_failed_step,
+    parse_error_fields,
     strip_ansi,
     trim_to_tokens,
-    detect_language,
-    find_failed_step,
-    extract_stack_trace,
-    parse_error_fields,
 )
 
 

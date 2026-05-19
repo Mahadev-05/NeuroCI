@@ -14,18 +14,17 @@ import structlog
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.llm_factory import get_chat_llm
-
-from src.config import get_settings
-from src.models import AgentState, PatchResult, FilePatch
 from src.agent.prompts import (
+    ASSERTION_DECISION_PROMPT,
+    FEW_SHOT_EXAMPLE,
+    FEW_SHOT_TEMPLATE,
     REPAIR_SYSTEM_PROMPT,
     REPAIR_USER_PROMPT,
-    FEW_SHOT_TEMPLATE,
-    FEW_SHOT_EXAMPLE,
     RETRY_SYSTEM_PROMPT,
     RETRY_USER_PROMPT,
-    ASSERTION_DECISION_PROMPT,
 )
+from src.config import get_settings
+from src.models import AgentState, FilePatch, PatchResult
 
 logger = structlog.get_logger()
 
@@ -70,7 +69,7 @@ def _parse_llm_response(response_text: str) -> dict:
 async def decide_assertion_fix_target(state: AgentState) -> dict:
     """Decide whether to fix the test or the source code for TestAssertion failures."""
     llm = get_chat_llm(temperature=0.1, max_tokens=500)
-    
+
     prompt = f"""\
 Analyze the test failure below. Decide whether we should fix the IMPLEMENTATION (source code) or the TEST itself.
 
@@ -92,7 +91,7 @@ Analyze the test failure below. Decide whether we should fix the IMPLEMENTATION 
         SystemMessage(content=ASSERTION_DECISION_PROMPT),
         HumanMessage(content=prompt)
     ]
-    
+
     try:
         response = await llm.ainvoke(messages)
         return _parse_llm_response(response.content)
@@ -165,7 +164,7 @@ async def generate_patch(state: AgentState) -> AgentState:
     - Confidence score
     - PR description
     """
-    settings = get_settings()
+    get_settings()
 
     if not state.parsed_error:
         logger.warning("patch_generator.no_error", run_id=state.run_id)
@@ -179,7 +178,7 @@ async def generate_patch(state: AgentState) -> AgentState:
         if target_file and target_file != state.parsed_error.file_path:
             logger.info("patch_generator.assertion_target_changed", original=state.parsed_error.file_path, new=target_file, reasoning=target_info.get("reasoning"))
             state.parsed_error.file_path = target_file
-            
+
             # Fetch the new target file content
             from src.pipeline.github_client import GitHubClient
             github = GitHubClient()
@@ -301,7 +300,7 @@ async def retry_patch(
     Retry patch generation with the validation error fed back as context.
     This is called when the first patch fails syntax validation.
     """
-    settings = get_settings()
+    get_settings()
 
     if not state.parsed_error:
         return state

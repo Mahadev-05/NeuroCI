@@ -3,12 +3,10 @@ NeuroCI — Integration Tests.
 
 Tests for the full webhook→dispatch flow with mocked dependencies.
 """
-import json
 import hashlib
 import hmac
-import pytest
-from unittest.mock import patch, MagicMock
-
+import json
+from unittest.mock import MagicMock, patch
 
 WEBHOOK_SECRET = "test-secret-123"
 
@@ -70,8 +68,9 @@ class TestWebhookIntegration:
             s.opa_url = "http://localhost:8181"
             s.is_repo_allowed.return_value = True
             ms.return_value = s
-            from src.main import app
             from fastapi.testclient import TestClient
+
+            from src.main import app
             return TestClient(app)
 
     def test_missing_signature_returns_403(self):
@@ -141,8 +140,9 @@ class TestHealthEndpoints:
             s.chroma_port = 8000
             s.opa_url = "http://localhost:8181"
             ms.return_value = s
-            from src.main import app
             from fastapi.testclient import TestClient
+
+            from src.main import app
             return TestClient(app)
 
     def test_health(self):

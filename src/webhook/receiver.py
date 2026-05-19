@@ -20,13 +20,13 @@ from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 
 from src.config import get_settings
+from src.metrics.prometheus import track_webhook
 from src.models import (
     AgentState,
     GitHubWebhookPayload,
     WebhookResponse,
 )
 from src.webhook.security import verify_github_signature
-from src.metrics.prometheus import track_webhook
 
 logger = structlog.get_logger()
 router = APIRouter()
@@ -257,7 +257,7 @@ async def _handle_pull_request_event(raw: dict) -> WebhookResponse | JSONRespons
 
     # ── Step 11: Register pending verification when a NeuroCI PR is merged ──
     if merged:
-        head_branch = pr.get("head", {}).get("ref", "")
+        pr.get("head", {}).get("ref", "")
         base_branch = pr.get("base", {}).get("ref", "main")
         _register_pending_verification(
             repo=repo,
@@ -409,8 +409,9 @@ async def _handle_verification_success(
     Send a Slack success notification with MTTR metrics.
     """
     import time as _time
-    from src.notifications.slack_bot import send_verification_result
+
     from src.metrics.prometheus import FIXES_TOTAL
+    from src.notifications.slack_bot import send_verification_result
 
     original_run_id = verification.get("original_run_id", 0)
     pr_number = verification.get("pr_number", 0)
@@ -461,8 +462,8 @@ async def _handle_verification_failure(
     If this is the first re-failure, trigger a second diagnostic cycle
     with context from the first attempt. Otherwise, escalate to human.
     """
-    from src.notifications.slack_bot import send_verification_result
     from src.metrics.prometheus import FIXES_TOTAL
+    from src.notifications.slack_bot import send_verification_result
 
     original_run_id = verification.get("original_run_id", 0)
     pr_number = verification.get("pr_number", 0)

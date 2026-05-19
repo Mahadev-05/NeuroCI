@@ -17,7 +17,6 @@ import structlog
 from chromadb.config import Settings as ChromaSettings
 
 from src.agent.llm_factory import get_embeddings
-
 from src.config import get_settings
 from src.models import SimilarFix
 

@@ -4,11 +4,12 @@ NeuroCI — OPA Client Tests.
 Tests for OPA policy evaluation and local fallback logic.
 """
 
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.models import AgentState, PatchResult, FailureCategory
-from src.policy.opa_client import evaluate_policy, _local_policy_check
+import pytest
+
+from src.models import AgentState, FailureCategory, PatchResult
+from src.policy.opa_client import _local_policy_check, evaluate_policy
 
 
 def _make_state(

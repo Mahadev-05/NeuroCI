@@ -7,11 +7,9 @@ Tests for HMAC verification, payload parsing, and webhook endpoint.
 import hashlib
 import hmac
 import json
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
-
 
 # ── Fixtures ──
 WEBHOOK_SECRET = "test-secret-123"

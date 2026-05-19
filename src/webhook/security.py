@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-from typing import Optional
 
 import structlog
 from fastapi import HTTPException, Request, status
@@ -32,7 +31,7 @@ async def verify_github_signature(request: Request) -> bytes:
     settings = get_settings()
 
     # ── Get signature header ──
-    signature_header: Optional[str] = request.headers.get("X-Hub-Signature-256")
+    signature_header: str | None = request.headers.get("X-Hub-Signature-256")
     if not signature_header:
         logger.warning(
             "webhook.security.missing_signature",

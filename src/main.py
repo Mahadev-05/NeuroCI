@@ -10,25 +10,24 @@ The main application server that:
 
 from __future__ import annotations
 
-import structlog
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import Any
 
 import httpx
 import redis as redis_lib
+import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import make_asgi_app
 
 from src.config import get_settings
+from src.metrics.prometheus import (
+    FIXES_TOTAL,
+    setup_metrics,
+)
 from src.models import HealthResponse, MetricsSnapshot
 from src.webhook.receiver import router as webhook_router
-from src.metrics.prometheus import (
-    setup_metrics,
-    FIXES_TOTAL,
-    CONFIDENCE_HISTOGRAM,
-    FIX_ACCURACY_7D,
-)
 
 
 # ── Structured Logging ─────────────────────────────────────
@@ -222,7 +221,7 @@ async def status_endpoint() -> dict[str, Any]:
         "total_fixes_today": 0,
         "queue_depth": 0
     }
-    
+
     # Check Redis & Queue depth
     try:
         r = redis_lib.from_url(settings.redis_url, socket_connect_timeout=2)
@@ -233,7 +232,7 @@ async def status_endpoint() -> dict[str, Any]:
         r.close()
     except Exception:
         pass
-        
+
     # Check ChromaDB
     try:
         async with httpx.AsyncClient(timeout=3.0) as client:
@@ -242,12 +241,12 @@ async def status_endpoint() -> dict[str, Any]:
                 status_info["chromadb_connected"] = True
     except Exception:
         pass
-        
+
     # Get total fixes today from metrics
     try:
         for sample in FIXES_TOTAL.collect()[0].samples:
             status_info["total_fixes_today"] += int(sample.value)
     except Exception:
         pass
-        
+
     return status_info

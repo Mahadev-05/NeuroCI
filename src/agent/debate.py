@@ -8,26 +8,26 @@ A third "judge" call picks the safer one, reducing hallucination.
 from __future__ import annotations
 
 import json
+
 import structlog
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from src.agent.llm_factory import get_chat_llm
-
-from src.config import get_settings
-from src.models import AgentState, PatchResult
 from src.agent.prompts import (
     DEBATE_AGENT_SYSTEM_PROMPT,
     DEBATE_JUDGE_SYSTEM_PROMPT,
     DEBATE_JUDGE_USER_PROMPT,
     REPAIR_USER_PROMPT,
 )
+from src.config import get_settings
+from src.models import AgentState, PatchResult
 
 logger = structlog.get_logger()
 
 
 async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dict:
     """Generate a patch from one debate agent."""
-    settings = get_settings()
+    get_settings()
     pe = state.parsed_error
     user_prompt = REPAIR_USER_PROMPT.format(
         category=state.category.value,
@@ -46,7 +46,7 @@ async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dic
         resp = await llm.ainvoke(msgs)
         text = resp.content.strip()
         if text.startswith("```"):
-            lines = [l for l in text.split("\n") if not l.strip().startswith("```")]
+            lines = [line for line in text.split("\n") if not line.strip().startswith("```")]
             text = "\n".join(lines).strip()
         return json.loads(text)
     except Exception as e:
@@ -56,7 +56,7 @@ async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dic
 
 async def debate_and_select(state: AgentState) -> AgentState:
     """Two agents compete, judge picks safer patch."""
-    settings = get_settings()
+    get_settings()
     logger.info("debate.starting", run_id=state.run_id)
 
     p1 = await _gen_agent_patch(state, 1, 0.1)
@@ -65,8 +65,10 @@ async def debate_and_select(state: AgentState) -> AgentState:
     if not p1 and not p2:
         logger.error("debate.both_failed", run_id=state.run_id)
         return state
-    if not p1: p1 = p2
-    if not p2: p2 = p1
+    if not p1:
+        p1 = p2
+    if not p2:
+        p2 = p1
 
     pe = state.parsed_error
     judge_prompt = DEBATE_JUDGE_USER_PROMPT.format(
@@ -85,7 +87,7 @@ async def debate_and_select(state: AgentState) -> AgentState:
                                   HumanMessage(content=judge_prompt)])
         text = jr.content.strip()
         if text.startswith("```"):
-            lines = [l for l in text.split("\n") if not l.strip().startswith("```")]
+            lines = [line for line in text.split("\n") if not line.strip().startswith("```")]
             text = "\n".join(lines).strip()
         verdict = json.loads(text)
         chosen = p1 if verdict.get("chosen_agent") == 1 else p2

@@ -4,8 +4,9 @@ NeuroCI — LLM Factory Tests.
 Tests for provider selection, initialization, and error handling.
 """
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 
 class TestGetChatLLM:
@@ -40,7 +41,7 @@ class TestGetChatLLM:
         # Should not raise — uses settings.llm_provider
         with patch("langchain_google_genai.ChatGoogleGenerativeAI", create=True):
             try:
-                llm = get_chat_llm()
+                get_chat_llm()
             except ImportError:
                 pass  # OK if langchain_google_genai not installed in test
 
