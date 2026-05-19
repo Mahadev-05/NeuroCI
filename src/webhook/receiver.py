@@ -317,7 +317,7 @@ def _get_cached_state(run_id: int) -> dict | None:
     try:
         cached = r.get(f"neuroci:state:{run_id}")
         r.close()
-        if cached:
+        if cached and isinstance(cached, (str, bytes)):
             state = json.loads(cached)
             return {
                 "failure_log": state.get("parsed_error", {}).get("raw_log", "")[:4000],
@@ -382,7 +382,7 @@ def _check_pending_verification(repo: str, branch: str) -> dict | None:
         key = f"neuroci:verification:{repo}:{branch}"
         data = r.get(key)
         r.close()
-        if data:
+        if data and isinstance(data, (str, bytes)):
             return json.loads(data)
     except Exception:
         pass
