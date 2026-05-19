@@ -1,0 +1,147 @@
+# NeuroCI — Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neuroci-redis
+  namespace: neuroci
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neuroci
+      component: redis
+  template:
+    metadata:
+      labels:
+        app: neuroci
+        component: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neuroci-redis
+  namespace: neuroci
+spec:
+  selector:
+    app: neuroci
+    component: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+---
+# NeuroCI — ChromaDB StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neuroci-chromadb
+  namespace: neuroci
+spec:
+  serviceName: neuroci-chromadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neuroci
+      component: chromadb
+  template:
+    metadata:
+      labels:
+        app: neuroci
+        component: chromadb
+    spec:
+      containers:
+        - name: chromadb
+          image: chromadb/chroma:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ANONYMIZED_TELEMETRY
+              value: "false"
+          volumeMounts:
+            - name: chroma-storage
+              mountPath: /chroma/chroma
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: chroma-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neuroci-chromadb
+  namespace: neuroci
+spec:
+  selector:
+    app: neuroci
+    component: chromadb
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# NeuroCI — OPA Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neuroci-opa
+  namespace: neuroci
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neuroci
+      component: opa
+  template:
+    metadata:
+      labels:
+        app: neuroci
+        component: opa
+    spec:
+      containers:
+        - name: opa
+          image: openpolicyagent/opa:latest
+          args: ["run", "--server", "/policies/neuroci.rego"]
+          ports:
+            - containerPort: 8181
+          volumeMounts:
+            - name: policies
+              mountPath: /policies
+      volumes:
+        - name: policies
+          configMap:
+            name: neuroci-policies
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neuroci-opa
+  namespace: neuroci
+spec:
+  selector:
+    app: neuroci
+    component: opa
+  ports:
+    - port: 8181
+      targetPort: 8181

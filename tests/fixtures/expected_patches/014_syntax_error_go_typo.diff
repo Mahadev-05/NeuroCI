@@ -1,0 +1,5 @@
+--- a/main.go
++++ b/main.go
+@@ -15,1 +15,1 @@
+-	fmt.Prinltn("Hello")
++	fmt.Println("Hello")

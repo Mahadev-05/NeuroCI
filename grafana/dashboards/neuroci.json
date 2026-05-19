@@ -1,0 +1,119 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Fix Rate by Category",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(neuroci_fixes_total) by (category)",
+          "legendFormat": "{{category}}"
+        }
+      ]
+    },
+    {
+      "title": "Confidence Score Distribution",
+      "type": "histogram",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "neuroci_confidence_score_bucket",
+          "legendFormat": "{{le}}"
+        }
+      ]
+    },
+    {
+      "title": "MTTR (Mean Time To Repair)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(neuroci_mttr_seconds_bucket[1h]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(neuroci_mttr_seconds_bucket[1h]))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "title": "Fix Accuracy (7-day rolling)",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "neuroci_fix_accuracy_7d" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 1,
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "yellow", "value": 0.6 },
+              { "color": "green", "value": 0.8 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Active Repairs",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "neuroci_active_repairs" }
+      ]
+    },
+    {
+      "title": "Webhooks Received",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 12 },
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(neuroci_webhooks_received_total)" }
+      ]
+    },
+    {
+      "title": "Fix Results Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(neuroci_fixes_total[5m])) by (result)",
+          "legendFormat": "{{result}}"
+        }
+      ]
+    },
+    {
+      "title": "Pipeline Stage Durations",
+      "type": "heatmap",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 },
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(neuroci_stage_duration_seconds_bucket[5m])) by (stage, le)",
+          "legendFormat": "{{stage}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["neuroci", "devops", "ai"],
+  "templating": { "list": [] },
+  "time": { "from": "now-24h", "to": "now" },
+  "title": "NeuroCI — Self-Healing Pipeline",
+  "uid": "neuroci-main"
+}

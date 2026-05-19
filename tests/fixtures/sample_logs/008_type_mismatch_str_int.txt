@@ -1,0 +1,4 @@
+2026-05-14T09:00:00.0000000Z ##[group]Run mypy src/ --strict
+2026-05-14T09:00:01.0000000Z src/handlers/webhook.py:42: error: Argument 1 to "process" has incompatible type "str"; expected "int"  [arg-type]
+2026-05-14T09:00:01.1000000Z Found 1 error in 1 file (checked 24 source files)
+2026-05-14T09:00:01.2000000Z ##[error]Process completed with exit code 1.

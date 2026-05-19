@@ -1,0 +1,138 @@
+# ═══════════════════════════════════════════════════════════
+# NeuroCI — Docker Compose (Local Development)
+#
+# Starts the full stack:
+#   docker compose up
+#
+# Services:
+#   - webhook:   FastAPI webhook server (port 8000)
+#   - worker:    Celery worker (repair tasks)
+#   - redis:     Message broker + result backend
+#   - chromadb:  Vector store for RAG memory
+#   - opa:       Open Policy Agent
+#   - prometheus: Metrics collection
+#   - grafana:   Dashboards (port 3000)
+# ═══════════════════════════════════════════════════════════
+
+services:
+
+  # ── FastAPI Webhook Server ─────────────────────────────
+  webhook:
+    build: .
+    container_name: neuroci-webhook
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - OPA_URL=http://opa:8181
+    depends_on:
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ── Celery Worker ──────────────────────────────────────
+  worker:
+    build: .
+    container_name: neuroci-worker
+    command: celery -A src.tasks.repair_task:celery_app worker --loglevel=info --concurrency=2
+    env_file: .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - OPA_URL=http://opa:8181
+    depends_on:
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    restart: unless-stopped
+
+  # ── Redis ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: neuroci-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── ChromaDB ───────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: neuroci-chromadb
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=false
+    restart: unless-stopped
+
+  # ── OPA (Open Policy Agent) ────────────────────────────
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: neuroci-opa
+    ports:
+      - "8181:8181"
+    command:
+      - run
+      - --server
+      - --log-level=info
+      - /policies/neuroci.rego
+    volumes:
+      - ./policies:/policies:ro
+    restart: unless-stopped
+
+  # ── Prometheus ─────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: neuroci-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - webhook
+    restart: unless-stopped
+
+  # ── Grafana ────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: neuroci-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=neuroci
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  chroma_data:
+  prometheus_data:
+  grafana_data:

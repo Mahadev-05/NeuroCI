@@ -1,0 +1,112 @@
+# NeuroCI Helm Chart — Default Values
+
+replicaCount:
+  webhook: 2
+  worker: 1
+
+image:
+  repository: neuroci
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# ── Secrets (override via --set or values override file) ──
+secrets:
+  githubToken: ""
+  githubWebhookSecret: ""
+  slackBotToken: ""
+  slackSigningSecret: ""
+
+# ── LLM Provider Configuration ──
+llm:
+  # Provider: gemini (free), groq (free), ollama (local), openai (paid)
+  provider: gemini
+  gemini:
+    apiKey: ""
+    model: gemini-2.0-flash
+    embeddingModel: models/text-embedding-004
+  groq:
+    apiKey: ""
+    model: llama-3.3-70b-versatile
+  ollama:
+    url: http://localhost:11434
+    model: llama3.1
+    embeddingModel: nomic-embed-text
+  openai:
+    apiKey: ""
+    model: gpt-4o
+    embeddingModel: text-embedding-3-small
+
+# ── Configuration ──
+config:
+  confidenceThreshold: "0.85"
+  maxPatchLines: "20"
+  maxLogTokens: "8000"
+  restrictedPaths: "infra/,terraform/,secrets.py,auth.py,.env"
+  logLevel: INFO
+  allowedRepos: ""
+
+# ── Redis ──
+redis:
+  enabled: true
+  image: redis:7-alpine
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# ── ChromaDB ──
+chromadb:
+  enabled: true
+  image: chromadb/chroma:latest
+  storage: 5Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# ── OPA ──
+opa:
+  enabled: true
+  image: openpolicyagent/opa:latest
+
+# ── Prometheus ──
+prometheus:
+  enabled: true
+
+# ── Grafana ──
+grafana:
+  enabled: true
+  adminPassword: neuroci
+
+# ── Ingress ──
+ingress:
+  enabled: false
+  className: nginx
+  host: neuroci.example.com
+  tls: false
+
+# ── KEDA autoscaling ──
+keda:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  queueLength: 3
+
+# ── Resources ──
+webhook:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+worker:
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi

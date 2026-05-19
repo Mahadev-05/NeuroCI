@@ -1,0 +1,5 @@
+--- a/src/auth/token.py
++++ b/src/auth/token.py
+@@ -30,1 +30,1 @@
+-    return datetime.utcnow() > self.expires_at
++    return datetime.now(timezone.utc) > self.expires_at

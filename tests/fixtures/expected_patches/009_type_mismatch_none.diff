@@ -1,0 +1,5 @@
+--- a/src/report.py
++++ b/src/report.py
+@@ -55,1 +55,1 @@
+-    full_text = header + body
++    full_text = (header or "") + body

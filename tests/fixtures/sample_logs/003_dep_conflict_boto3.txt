@@ -1,0 +1,6 @@
+2026-05-14T04:10:00.0000000Z ##[group]Run pip install -r requirements.txt
+2026-05-14T04:10:01.0000000Z Collecting boto3==1.28.0
+2026-05-14T04:10:02.0000000Z   Downloading boto3-1.28.0.tar.gz (132 kB)
+2026-05-14T04:10:03.0000000Z ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. As a result, the following dependency conflict was found:
+2026-05-14T04:10:03.1000000Z boto3 1.28.0 requires botocore<1.31.1,>=1.31.0, but you have botocore 1.29.76 which is incompatible.
+2026-05-14T04:10:03.2000000Z ##[error]Process completed with exit code 1.

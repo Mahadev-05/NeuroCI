@@ -1,0 +1,17 @@
+2026-05-14T07:00:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T07:00:01.0000000Z ============================= test session starts ==============================
+2026-05-14T07:00:01.1000000Z collected 18 items
+2026-05-14T07:00:02.0000000Z tests/test_user_service.py::test_create_user PASSED
+2026-05-14T07:00:02.1000000Z tests/test_user_service.py::test_create_user_returns_id FAILED
+2026-05-14T07:00:02.2000000Z
+2026-05-14T07:00:02.3000000Z =================================== FAILURES ===================================
+2026-05-14T07:00:02.4000000Z _____________________ test_create_user_returns_id _____________________________
+2026-05-14T07:00:02.5000000Z
+2026-05-14T07:00:02.6000000Z     def test_create_user_returns_id():
+2026-05-14T07:00:02.7000000Z         response = client.post("/users", json={"name": "test"})
+2026-05-14T07:00:02.8000000Z >       assert response.json()["id"] is not None
+2026-05-14T07:00:02.9000000Z E       KeyError: 'id'
+2026-05-14T07:00:03.0000000Z E       Full response: {'user_id': 'abc-123', 'name': 'test'}
+2026-05-14T07:00:03.1000000Z
+2026-05-14T07:00:03.2000000Z tests/test_user_service.py:22: KeyError
+2026-05-14T07:00:03.3000000Z ##[error]Process completed with exit code 1.

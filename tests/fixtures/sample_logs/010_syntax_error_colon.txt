@@ -1,0 +1,6 @@
+2026-05-14T10:00:00.0000000Z ##[group]Run python -m py_compile src/models/user.py
+2026-05-14T10:00:01.0000000Z   File "src/models/user.py", line 23
+2026-05-14T10:00:01.1000000Z     def get_name(self)
+2026-05-14T10:00:01.2000000Z                      ^
+2026-05-14T10:00:01.3000000Z SyntaxError: expected ':'
+2026-05-14T10:00:01.4000000Z ##[error]Process completed with exit code 1.

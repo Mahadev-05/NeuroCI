@@ -1,0 +1,5 @@
+--- a/src/handlers/user.py
++++ b/src/handlers/user.py
+@@ -28,1 +28,1 @@
+-    return user.profile.email
++    return user.profile.email if user.profile else None

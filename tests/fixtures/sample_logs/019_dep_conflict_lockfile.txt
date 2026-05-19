@@ -1,0 +1,7 @@
+2026-05-14T18:00:00.0000000Z ##[group]Run poetry install
+2026-05-14T18:00:01.0000000Z Installing dependencies from lock file
+2026-05-14T18:00:02.0000000Z
+2026-05-14T18:00:02.1000000Z Warning: poetry.lock is not consistent with pyproject.toml. You may be getting improper dependencies. Run `poetry lock [--no-update]` to fix it.
+2026-05-14T18:00:02.2000000Z
+2026-05-14T18:00:02.3000000Z Because myapp depends on fastapi (^0.104.0) which doesn't match any versions of fastapi in the lock file, version solving failed.
+2026-05-14T18:00:02.4000000Z ##[error]Process completed with exit code 1.

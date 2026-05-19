@@ -1,0 +1,7 @@
+--- a/config.yaml
++++ b/config.yaml
+@@ -8,0 +8,4 @@
++database:
++  host: localhost
++  port: 5432
++  name: myapp_db

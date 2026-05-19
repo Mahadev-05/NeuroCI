@@ -1,0 +1,5 @@
+--- a/src/api/routes.py
++++ b/src/api/routes.py
+@@ -7,1 +7,1 @@
+-from src.services.notification import send_email
++from src.services.notification import send_notification_email as send_email

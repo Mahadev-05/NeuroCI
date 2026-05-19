@@ -1,0 +1,5 @@
+--- a/src/App.js
++++ b/src/App.js
+@@ -2,1 +2,1 @@
+-import Header from './components/Header'
++import Header from './components/header/Header'

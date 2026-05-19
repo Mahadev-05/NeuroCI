@@ -1,0 +1,66 @@
+# NeuroCI — Celery Worker Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neuroci-worker
+  namespace: neuroci
+  labels:
+    app: neuroci
+    component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neuroci
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: neuroci
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: neuroci:latest
+          command:
+            - celery
+            - -A
+            - src.tasks.repair_task:celery_app
+            - worker
+            - --loglevel=info
+            - --concurrency=2
+          envFrom:
+            - secretRef:
+                name: neuroci-secrets
+          env:
+            - name: REDIS_URL
+              value: redis://neuroci-redis:6379/0
+            - name: CHROMA_HOST
+              value: neuroci-chromadb
+            - name: OPA_URL
+              value: http://neuroci-opa:8181
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+# KEDA ScaledObject — autoscale workers based on Redis queue depth
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: neuroci-worker-scaler
+  namespace: neuroci
+spec:
+  scaleTargetRef:
+    name: neuroci-worker
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+    - type: redis
+      metadata:
+        address: neuroci-redis:6379
+        listName: celery
+        listLength: "3"

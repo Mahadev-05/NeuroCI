@@ -1,0 +1,5 @@
+--- a/src/config.py
++++ b/src/config.py
+@@ -18,1 +18,1 @@
+-DATABASE_URL = os.environ["DATABASE_URL"]
++DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///local.db")

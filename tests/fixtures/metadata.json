@@ -1,0 +1,102 @@
+{
+    "001_import_error_missing_module": {
+        "category": "ImportError",
+        "outcome": "merged",
+        "description": "Missing dateutil dependency — not in requirements.txt"
+    },
+    "002_import_error_wrong_name": {
+        "category": "ImportError",
+        "outcome": "merged",
+        "description": "Function was renamed but import not updated"
+    },
+    "003_dep_conflict_boto3": {
+        "category": "DependencyVersionConflict",
+        "outcome": "merged",
+        "description": "boto3 and botocore version mismatch"
+    },
+    "004_dep_conflict_npm": {
+        "category": "DependencyVersionConflict",
+        "outcome": "merged",
+        "description": "React peer dependency conflict with react-router-dom"
+    },
+    "005_test_assertion_divide": {
+        "category": "TestAssertion",
+        "outcome": "merged",
+        "description": "Division by zero returns inf instead of 0"
+    },
+    "006_test_assertion_key_error": {
+        "category": "TestAssertion",
+        "outcome": "merged",
+        "description": "API response key renamed from 'id' to 'user_id'"
+    },
+    "007_config_missing_env": {
+        "category": "ConfigMissing",
+        "outcome": "merged",
+        "description": "DATABASE_URL env var not set in CI environment"
+    },
+    "008_type_mismatch_str_int": {
+        "category": "TypeMismatch",
+        "outcome": "merged",
+        "description": "String passed where int expected"
+    },
+    "009_type_mismatch_none": {
+        "category": "TypeMismatch",
+        "outcome": "merged",
+        "description": "NoneType concatenation with str"
+    },
+    "010_syntax_error_colon": {
+        "category": "SyntaxError",
+        "outcome": "merged",
+        "description": "Missing colon after function definition"
+    },
+    "011_logic_bug_pagination": {
+        "category": "LogicBug",
+        "outcome": "merged",
+        "description": "Off-by-one error in pagination calculation"
+    },
+    "012_logic_bug_token_expiry": {
+        "category": "LogicBug",
+        "outcome": "rejected",
+        "description": "Token expiry timezone-naive comparison — fix was insufficient"
+    },
+    "013_import_error_js_path": {
+        "category": "ImportError",
+        "outcome": "merged",
+        "description": "JavaScript component import path changed"
+    },
+    "014_syntax_error_go_typo": {
+        "category": "SyntaxError",
+        "outcome": "merged",
+        "description": "Go function name typo: Prinltn -> Println"
+    },
+    "015_config_missing_yaml": {
+        "category": "ConfigMissing",
+        "outcome": "merged",
+        "description": "Missing config.yaml key for database section"
+    },
+    "016_flaky_test_timing": {
+        "category": "FlakyTest",
+        "outcome": "merged",
+        "description": "Test depends on timing — passes 3/5 runs"
+    },
+    "017_import_error_circular": {
+        "category": "ImportError",
+        "outcome": "merged",
+        "description": "Circular import between two modules"
+    },
+    "018_test_assertion_float": {
+        "category": "TestAssertion",
+        "outcome": "merged",
+        "description": "Floating point comparison without tolerance"
+    },
+    "019_dep_conflict_lockfile": {
+        "category": "DependencyVersionConflict",
+        "outcome": "merged",
+        "description": "Poetry lock file out of sync with pyproject.toml"
+    },
+    "020_type_mismatch_optional": {
+        "category": "TypeMismatch",
+        "outcome": "merged",
+        "description": "Optional field accessed without None check"
+    }
+}

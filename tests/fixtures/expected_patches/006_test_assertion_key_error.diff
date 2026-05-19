@@ -1,0 +1,5 @@
+--- a/tests/test_user_service.py
++++ b/tests/test_user_service.py
+@@ -22,1 +22,1 @@
+-    assert response.json()["id"] is not None
++    assert response.json()["user_id"] is not None

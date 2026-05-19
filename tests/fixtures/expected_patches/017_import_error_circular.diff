@@ -1,0 +1,9 @@
+--- a/src/services/email.py
++++ b/src/services/email.py
+@@ -3,4 +3,4 @@
+-from src.services.template import render_template
+-
+ class EmailConfig:
+     pass
++
++from src.services.template import render_template  # avoid circular: import after class def

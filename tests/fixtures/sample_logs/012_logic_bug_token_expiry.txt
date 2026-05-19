@@ -1,0 +1,13 @@
+2026-05-14T11:00:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T11:00:01.0000000Z tests/test_auth.py::test_token_expiry FAILED
+2026-05-14T11:00:01.1000000Z
+2026-05-14T11:00:01.2000000Z =================================== FAILURES ===================================
+2026-05-14T11:00:01.3000000Z ____________________________ test_token_expiry _________________________________
+2026-05-14T11:00:01.4000000Z     def test_token_expiry():
+2026-05-14T11:00:01.5000000Z         token = create_token(expires_in=timedelta(hours=-2))
+2026-05-14T11:00:01.6000000Z >       assert token.is_expired() is True
+2026-05-14T11:00:01.7000000Z E       AssertionError: assert False is True
+2026-05-14T11:00:01.8000000Z E       Token created 2 hours ago with timezone-naive datetime
+2026-05-14T11:00:01.9000000Z
+2026-05-14T11:00:02.0000000Z tests/test_auth.py:45: AssertionError
+2026-05-14T11:00:02.1000000Z ##[error]Process completed with exit code 1.

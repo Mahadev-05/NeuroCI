@@ -1,0 +1,17 @@
+2026-05-14T03:22:10.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T03:22:10.0000001Z pytest tests/ -v --tb=short
+2026-05-14T03:22:10.0000002Z ##[endgroup]
+2026-05-14T03:22:12.1234567Z ============================= test session starts ==============================
+2026-05-14T03:22:12.2234567Z platform linux -- Python 3.11.7, pytest-7.4.3
+2026-05-14T03:22:12.3234567Z collected 0 items / 1 error
+2026-05-14T03:22:12.4234567Z
+2026-05-14T03:22:12.5234567Z ==================================== ERRORS ====================================
+2026-05-14T03:22:12.6234567Z _______ ERROR collecting tests/test_routes.py ________________________________
+2026-05-14T03:22:12.7234567Z Traceback (most recent call last):
+2026-05-14T03:22:12.8234567Z   File "src/api/routes.py", line 7, in <module>
+2026-05-14T03:22:12.9234567Z     from src.services.notification import send_email
+2026-05-14T03:22:13.0234567Z ImportError: cannot import name 'send_email' from 'src.services.notification' (/app/src/services/notification.py)
+2026-05-14T03:22:13.1234567Z =========================== short test summary info ============================
+2026-05-14T03:22:13.2234567Z ERROR tests/test_routes.py
+2026-05-14T03:22:13.3234567Z ============================== 1 error in 0.31s ===============================
+2026-05-14T03:22:13.4234567Z ##[error]Process completed with exit code 1.

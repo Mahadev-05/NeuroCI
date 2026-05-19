@@ -1,0 +1,10 @@
+2026-05-14T19:00:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T19:00:01.0000000Z Traceback (most recent call last):
+2026-05-14T19:00:01.1000000Z   File "src/handlers/user.py", line 28, in get_user_email
+2026-05-14T19:00:01.2000000Z     return user.profile.email
+2026-05-14T19:00:01.3000000Z AttributeError: 'NoneType' object has no attribute 'email'
+2026-05-14T19:00:01.4000000Z
+2026-05-14T19:00:01.5000000Z During handling of the above exception:
+2026-05-14T19:00:01.6000000Z   File "src/handlers/user.py", line 28, in get_user_email
+2026-05-14T19:00:01.7000000Z     return user.profile.email
+2026-05-14T19:00:01.8000000Z ##[error]Process completed with exit code 1.

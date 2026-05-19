@@ -1,0 +1,32 @@
+# NeuroCI — Terraform Variables Example
+# Copy this file to terraform.tfvars and fill in your values.
+
+cloud_provider = "gcp"
+
+# Docker image (update after building and pushing)
+docker_image = "gcr.io/your-project/neuroci:latest"
+
+# GCP settings
+gcp_project_id = "your-gcp-project-id"
+gcp_region     = "us-central1"
+
+# AWS settings (only needed if cloud_provider = "aws")
+# aws_region = "us-east-1"
+
+# GitHub secrets
+github_token          = "github_pat_xxxxxxxxxxxxxxxxxxxx"
+github_webhook_secret = "your-webhook-secret"
+
+# LLM Provider: gemini (free), groq (free), ollama (local), openai (paid)
+llm_provider   = "gemini"
+gemini_api_key = "AIzaSy..."
+
+# Uncomment for other providers:
+# llm_provider  = "groq"
+# groq_api_key  = "gsk_..."
+
+# llm_provider    = "openai"
+# openai_api_key  = "sk-..."
+
+# Slack (optional)
+# slack_bot_token = "xoxb-..."

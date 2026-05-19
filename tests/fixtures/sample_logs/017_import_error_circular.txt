@@ -1,0 +1,14 @@
+2026-05-14T16:00:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T16:00:01.0000000Z ============================= test session starts ==============================
+2026-05-14T16:00:01.1000000Z collected 0 items / 1 error
+2026-05-14T16:00:02.0000000Z
+2026-05-14T16:00:02.1000000Z ==================================== ERRORS ====================================
+2026-05-14T16:00:02.2000000Z _______ ERROR collecting tests/test_services.py ______________________________
+2026-05-14T16:00:02.3000000Z ImportError while importing test module 'tests/test_services.py'.
+2026-05-14T16:00:02.4000000Z Traceback (most recent call last):
+2026-05-14T16:00:02.5000000Z   File "src/services/email.py", line 5, in <module>
+2026-05-14T16:00:02.6000000Z     from src.services.template import render_template
+2026-05-14T16:00:02.7000000Z   File "src/services/template.py", line 3, in <module>
+2026-05-14T16:00:02.8000000Z     from src.services.email import EmailConfig
+2026-05-14T16:00:02.9000000Z ImportError: cannot import name 'EmailConfig' from partially initialized module 'src.services.email' (most likely due to a circular import)
+2026-05-14T16:00:03.0000000Z ##[error]Process completed with exit code 1.

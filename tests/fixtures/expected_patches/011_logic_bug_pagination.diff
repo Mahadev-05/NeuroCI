@@ -1,0 +1,5 @@
+--- a/src/utils/pagination.py
++++ b/src/utils/pagination.py
+@@ -8,1 +8,1 @@
+-    total_pages = (total_items // per_page) + 1
++    total_pages = -(-total_items // per_page)  # ceiling division

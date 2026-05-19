@@ -1,0 +1,9 @@
+2026-05-14T14:00:00.0000000Z ##[group]Run python src/main.py
+2026-05-14T14:00:01.0000000Z Traceback (most recent call last):
+2026-05-14T14:00:01.1000000Z   File "src/main.py", line 12, in <module>
+2026-05-14T14:00:01.2000000Z     db_config = config["database"]
+2026-05-14T14:00:01.3000000Z KeyError: 'database'
+2026-05-14T14:00:01.4000000Z
+2026-05-14T14:00:01.5000000Z The config.yaml file is missing the 'database' section.
+2026-05-14T14:00:01.6000000Z Available keys: ['server', 'logging', 'cache']
+2026-05-14T14:00:01.7000000Z ##[error]Process completed with exit code 1.

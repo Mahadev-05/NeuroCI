@@ -1,0 +1,5 @@
+--- a/src/models/user.py
++++ b/src/models/user.py
+@@ -23,1 +23,1 @@
+-    def get_name(self)
++    def get_name(self):

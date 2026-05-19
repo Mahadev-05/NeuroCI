@@ -1,0 +1,13 @@
+# NeuroCI — Grafana Dashboard Provisioning
+apiVersion: 1
+
+providers:
+  - name: "NeuroCI"
+    orgId: 1
+    folder: "NeuroCI"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+      foldersFromFilesStructure: false

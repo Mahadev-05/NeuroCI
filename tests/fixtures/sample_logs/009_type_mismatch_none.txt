@@ -1,0 +1,6 @@
+2026-05-14T09:30:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T09:30:01.0000000Z Traceback (most recent call last):
+2026-05-14T09:30:01.1000000Z   File "src/report.py", line 55, in generate_summary
+2026-05-14T09:30:01.2000000Z     full_text = header + body
+2026-05-14T09:30:01.3000000Z TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'
+2026-05-14T09:30:01.4000000Z ##[error]Process completed with exit code 1.

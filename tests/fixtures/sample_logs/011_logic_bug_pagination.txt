@@ -1,0 +1,14 @@
+2026-05-14T10:30:00.0000000Z ##[group]Run pytest tests/ -v
+2026-05-14T10:30:01.0000000Z ============================= test session starts ==============================
+2026-05-14T10:30:01.1000000Z collected 15 items
+2026-05-14T10:30:02.0000000Z tests/test_pagination.py::test_page_count FAILED
+2026-05-14T10:30:02.1000000Z
+2026-05-14T10:30:02.2000000Z =================================== FAILURES ===================================
+2026-05-14T10:30:02.3000000Z _____________________________ test_page_count __________________________________
+2026-05-14T10:30:02.4000000Z     def test_page_count():
+2026-05-14T10:30:02.5000000Z         assert paginate(items=100, per_page=10).total_pages == 10
+2026-05-14T10:30:02.6000000Z >       AssertionError: assert 11 == 10
+2026-05-14T10:30:02.7000000Z E       Off-by-one: range(0, total_pages + 1) creates an extra page
+2026-05-14T10:30:02.8000000Z
+2026-05-14T10:30:02.9000000Z tests/test_pagination.py:8: AssertionError
+2026-05-14T10:30:03.0000000Z ##[error]Process completed with exit code 1.

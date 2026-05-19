@@ -1,0 +1,51 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# ── Virtual environments ──
+.venv/
+venv/
+env/
+
+# ── Environment ──
+.env
+.env.local
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Testing ──
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ── Type checking ──
+.mypy_cache/
+
+# ── Docker ──
+*.log
+
+# ── ChromaDB local data ──
+chroma_data/
+
+# ── Terraform ──
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
+
+# ── OS ──
+.DS_Store
+Thumbs.db

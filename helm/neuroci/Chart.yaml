@@ -1,0 +1,14 @@
+apiVersion: v2
+name: neuroci
+description: NeuroCI — AI-native autonomous CI/CD repair system
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - neuroci
+  - devops
+  - ai
+  - cicd
+  - self-healing
+maintainers:
+  - name: NeuroCI Team

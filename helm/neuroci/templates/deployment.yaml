@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "neuroci.fullname" . }}-secrets
+  labels:
+    {{- include "neuroci.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  GITHUB_TOKEN: {{ .Values.secrets.githubToken | quote }}
+  GITHUB_WEBHOOK_SECRET: {{ .Values.secrets.githubWebhookSecret | quote }}
+  OPENAI_API_KEY: {{ .Values.secrets.openaiApiKey | quote }}
+  SLACK_BOT_TOKEN: {{ .Values.secrets.slackBotToken | quote }}
+  SLACK_SIGNING_SECRET: {{ .Values.secrets.slackSigningSecret | quote }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "neuroci.fullname" . }}-webhook
+  labels:
+    {{- include "neuroci.labels" . | nindent 4 }}
+    component: webhook
+spec:
+  replicas: {{ .Values.replicaCount.webhook }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "neuroci.name" . }}
+      component: webhook
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "neuroci.name" . }}
+        component: webhook
+    spec:
+      containers:
+        - name: webhook
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: {{ include "neuroci.fullname" . }}-secrets
+          env:
+            - name: REDIS_URL
+              value: redis://{{ include "neuroci.fullname" . }}-redis:6379/0
+            - name: CHROMA_HOST
+              value: {{ include "neuroci.fullname" . }}-chromadb
+            - name: OPA_URL
+              value: http://{{ include "neuroci.fullname" . }}-opa:8181
+            - name: OPENAI_MODEL
+              value: {{ .Values.config.openaiModel }}
+            - name: NEUROCI_CONFIDENCE_THRESHOLD
+              value: {{ .Values.config.confidenceThreshold | quote }}
+            - name: NEUROCI_MAX_PATCH_LINES
+              value: {{ .Values.config.maxPatchLines | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.config.logLevel }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 5
+          resources:
+            {{- toYaml .Values.webhook.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neuroci.fullname" . }}-webhook
+  labels:
+    {{- include "neuroci.labels" . | nindent 4 }}
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "neuroci.name" . }}
+    component: webhook
+  ports:
+    - port: 80
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "neuroci.fullname" . }}-worker
+  labels:
+    {{- include "neuroci.labels" . | nindent 4 }}
+    component: worker
+spec:
+  replicas: {{ .Values.replicaCount.worker }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "neuroci.name" . }}
+      component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "neuroci.name" . }}
+        component: worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["celery", "-A", "src.tasks.repair_task:celery_app", "worker", "--loglevel=info"]
+          envFrom:
+            - secretRef:
+                name: {{ include "neuroci.fullname" . }}-secrets
+          env:
+            - name: REDIS_URL
+              value: redis://{{ include "neuroci.fullname" . }}-redis:6379/0
+            - name: CHROMA_HOST
+              value: {{ include "neuroci.fullname" . }}-chromadb
+            - name: OPA_URL
+              value: http://{{ include "neuroci.fullname" . }}-opa:8181
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

@@ -1,0 +1,5 @@
+--- a/src/handlers/webhook.py
++++ b/src/handlers/webhook.py
+@@ -42,1 +42,1 @@
+-    result = process(run_id_str)
++    result = process(int(run_id_str))

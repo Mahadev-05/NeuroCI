@@ -1,0 +1,8 @@
+--- a/src/calculator.py
++++ b/src/calculator.py
+@@ -15,2 +15,4 @@
+ def divide(a: float, b: float) -> float:
+-    return a / b
++    if b == 0:
++        return 0
++    return a / b

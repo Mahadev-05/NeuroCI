@@ -1,0 +1,5 @@
+--- a/tests/test_math_utils.py
++++ b/tests/test_math_utils.py
+@@ -10,1 +10,1 @@
+-    assert result == 0.2
++    assert result == pytest.approx(0.2)
