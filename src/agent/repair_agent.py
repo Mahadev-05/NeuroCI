@@ -187,11 +187,11 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                 if state.retry_count < 1:
                     state.retry_count += 1
                     logger.info("repair.step.7_retry", run_id=state.run_id)
-                    
+
                     # Safely extract previous diff
                     current_patch = state.patch
                     prev_diff = current_patch.unified_diff if current_patch else ""
-                    
+
                     state = await retry_patch(
                         state,
                         validation_error="\n".join(state.validation_errors),

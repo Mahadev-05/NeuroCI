@@ -216,7 +216,7 @@ async def root() -> dict[str, str]:
 async def status_endpoint() -> dict[str, Any]:
     """Status endpoint returning detailed health and metric info."""
     settings = get_settings()
-    
+
     redis_connected = False
     queue_depth = 0
     chromadb_connected = False
