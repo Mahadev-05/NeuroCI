@@ -15,10 +15,11 @@ import time
 import structlog
 from prometheus_client import Counter, Gauge, Histogram, Info
 
+from typing import Any
+
 from src.models import AgentState
 
 logger = structlog.get_logger()
-
 # ═══════════════════════════════════════════════════════════
 # Metric Definitions
 # ═══════════════════════════════════════════════════════════
@@ -127,11 +128,11 @@ class StageTimer:
         self.stage = stage_name
         self.start: float = 0
 
-    def __enter__(self):
+    def __enter__(self) -> StageTimer:
         self.start = time.monotonic()
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: Any) -> None:
         duration = time.monotonic() - self.start
         STAGE_DURATION.labels(stage=self.stage).observe(duration)
         logger.debug("metrics.stage_duration", stage=self.stage, duration_s=f"{duration:.2f}")

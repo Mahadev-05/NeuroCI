@@ -29,6 +29,8 @@ class VectorStore:
     def __init__(self) -> None:
         settings = get_settings()
         self._embeddings = get_embeddings()
+        self._client: Any = None
+        self._collection: Any = None
 
         try:
             self._client = chromadb.HttpClient(
@@ -67,7 +69,7 @@ class VectorStore:
             embedding = self._embed(failure_log)
 
             results = self._collection.query(
-                query_embeddings=[embedding],
+                query_embeddings=[embedding],  # type: ignore[arg-type]
                 n_results=top_k,
                 include=["documents", "metadatas", "distances"],
             )
@@ -81,9 +83,9 @@ class VectorStore:
 
                     fixes.append(SimilarFix(
                         failure_log=doc,
-                        fix_diff=meta.get("fix_diff", ""),
-                        category=meta.get("category", "Unknown"),
-                        outcome=meta.get("outcome", "unknown"),
+                        fix_diff=str(meta.get("fix_diff") or ""),
+                        category=str(meta.get("category") or "Unknown"),
+                        outcome=str(meta.get("outcome") or "unknown"),
                         similarity_score=max(0.0, similarity),
                     ))
 
@@ -117,7 +119,7 @@ class VectorStore:
 
             self._collection.upsert(
                 ids=[doc_id],
-                embeddings=[embedding],
+                embeddings=[embedding],  # type: ignore[arg-type]
                 documents=[failure_log[:4000]],
                 metadatas=[{
                     "fix_diff": fix_diff[:4000],

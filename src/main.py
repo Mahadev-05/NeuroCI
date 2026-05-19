@@ -19,6 +19,7 @@ import redis as redis_lib
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 
 from src.config import get_settings
@@ -112,7 +113,7 @@ async def health_check() -> HealthResponse:
 
 
 @app.get("/ready", response_model=HealthResponse, tags=["Health"])
-async def readiness_check() -> HealthResponse:
+async def readiness_check() -> HealthResponse | JSONResponse:
     """
     Readiness check — verifies downstream dependencies.
     Kubernetes uses this to determine if the pod should receive traffic.
@@ -154,7 +155,6 @@ async def readiness_check() -> HealthResponse:
     log.debug("readiness.check", checks=checks, status=status_str)
 
     if not all_ready:
-        from fastapi.responses import JSONResponse
         return JSONResponse(
             status_code=503,
             content={
@@ -181,14 +181,16 @@ async def metrics_snapshot() -> MetricsSnapshot:
 
     try:
         # Iterate over Prometheus metric samples
-        for sample in FIXES_TOTAL.collect()[0].samples:
-            cat = sample.labels.get("category", "Unknown")
-            result = sample.labels.get("result", "")
-            count = int(sample.value)
-            total_fixes += count
-            fixes_by_category[cat] = fixes_by_category.get(cat, 0) + count
-            if result in ("auto_pr", "slack_approval"):
-                total_prs += count
+        metrics_list = list(FIXES_TOTAL.collect())
+        if metrics_list:
+            for sample in metrics_list[0].samples:
+                cat = sample.labels.get("category", "Unknown")
+                result = sample.labels.get("result", "")
+                count = int(sample.value)
+                total_fixes += count
+                fixes_by_category[cat] = fixes_by_category.get(cat, 0) + count
+                if result in ("auto_pr", "slack_approval"):
+                    total_prs += count
     except Exception:
         pass
 
@@ -214,21 +216,19 @@ async def root() -> dict[str, str]:
 async def status_endpoint() -> dict[str, Any]:
     """Status endpoint returning detailed health and metric info."""
     settings = get_settings()
-    status_info = {
-        "redis_connected": False,
-        "chromadb_connected": False,
-        "llm_provider": settings.llm_provider,
-        "total_fixes_today": 0,
-        "queue_depth": 0
-    }
+    
+    redis_connected = False
+    queue_depth = 0
+    chromadb_connected = False
+    total_fixes_today = 0
 
     # Check Redis & Queue depth
     try:
         r = redis_lib.from_url(settings.redis_url, socket_connect_timeout=2)
         if r.ping():
-            status_info["redis_connected"] = True
+            redis_connected = True
             # Get celery queue depth
-            status_info["queue_depth"] = r.llen("celery")
+            queue_depth = r.llen("celery")
         r.close()
     except Exception:
         pass
@@ -238,15 +238,23 @@ async def status_endpoint() -> dict[str, Any]:
         async with httpx.AsyncClient(timeout=3.0) as client:
             resp = await client.get(f"http://{settings.chroma_host}:{settings.chroma_port}/api/v1/heartbeat")
             if resp.status_code == 200:
-                status_info["chromadb_connected"] = True
+                chromadb_connected = True
     except Exception:
         pass
 
     # Get total fixes today from metrics
     try:
-        for sample in FIXES_TOTAL.collect()[0].samples:
-            status_info["total_fixes_today"] += int(sample.value)
+        metrics_list = list(FIXES_TOTAL.collect())
+        if metrics_list:
+            for sample in metrics_list[0].samples:
+                total_fixes_today += int(sample.value)
     except Exception:
         pass
 
-    return status_info
+    return {
+        "redis_connected": redis_connected,
+        "chromadb_connected": chromadb_connected,
+        "llm_provider": settings.llm_provider,
+        "total_fixes_today": total_fixes_today,
+        "queue_depth": queue_depth
+    }

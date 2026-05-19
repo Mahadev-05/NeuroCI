@@ -56,7 +56,8 @@ async def classify_failure(state: AgentState) -> AgentState:
 
     try:
         response = await llm.ainvoke(messages)
-        result_text = response.content.strip()
+        resp_content = response.content if isinstance(response.content, str) else str(response.content)
+        result_text = resp_content.strip()
 
         # ── Parse JSON response ──
         # Handle markdown code blocks if the LLM wraps its response

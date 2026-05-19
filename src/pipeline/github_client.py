@@ -12,7 +12,7 @@ from __future__ import annotations
 import base64
 import io
 import zipfile
-from typing import Any
+from typing import Any, cast
 
 import httpx
 import structlog
@@ -164,7 +164,7 @@ class GitHubClient:
         response.raise_for_status()
 
         logger.info("github.file_updated", repo=repo, path=file_path, branch=branch)
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
     # ═══════════════════════════════════════════════════════
     # Pull Request
@@ -199,7 +199,7 @@ class GitHubClient:
             pr_number=pr_data["number"],
             pr_url=pr_data["html_url"],
         )
-        return pr_data
+        return cast(dict[str, Any], pr_data)
 
     # ═══════════════════════════════════════════════════════
     # Workflow Runs
@@ -209,14 +209,14 @@ class GitHubClient:
         url = f"{self.BASE_URL}/repos/{repo}/actions/runs/{run_id}"
         response = await self._client.get(url)
         response.raise_for_status()
-        return response.json()
+        return cast(dict[str, Any], response.json())
 
     async def get_workflow_jobs(self, repo: str, run_id: int) -> list[dict[str, Any]]:
         """Get all jobs for a workflow run — useful for finding the failed step."""
         url = f"{self.BASE_URL}/repos/{repo}/actions/runs/{run_id}/jobs"
         response = await self._client.get(url)
         response.raise_for_status()
-        return response.json().get("jobs", [])
+        return cast(list[dict[str, Any]], response.json().get("jobs", []))
 
     async def create_issue_comment(self, repo: str, issue_number: int, body: str) -> dict[str, Any]:
         """Post a comment to a PR or issue."""
@@ -224,4 +224,4 @@ class GitHubClient:
         data = {"body": body}
         response = await self._client.post(url, json=data)
         response.raise_for_status()
-        return response.json()
+        return cast(dict[str, Any], response.json())

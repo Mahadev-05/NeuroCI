@@ -10,7 +10,7 @@ from __future__ import annotations
 import httpx
 import structlog
 
-from src.config import get_settings
+from src.config import Settings, get_settings
 from src.models import AgentState, PolicyInput
 
 logger = structlog.get_logger()
@@ -62,7 +62,7 @@ async def evaluate_policy(state: AgentState) -> AgentState:
     return state
 
 
-def _local_policy_check(state: AgentState, settings) -> AgentState:
+def _local_policy_check(state: AgentState, settings: Settings) -> AgentState:
     """Fallback local policy when OPA is unavailable."""
     reasons = []
 

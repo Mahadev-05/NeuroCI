@@ -545,7 +545,8 @@ async def receive_slack_action(request: Request) -> dict[str, str]:
     When a developer clicks "Apply Fix" or "Dismiss" on a Slack notification.
     """
     form_data = await request.form()
-    payload_str = form_data.get("payload", "")
+    payload_val = form_data.get("payload", "")
+    payload_str = payload_val if isinstance(payload_val, str) else ""
 
     try:
         payload = json.loads(payload_str)

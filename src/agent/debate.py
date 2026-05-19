@@ -1,13 +1,7 @@
-"""
-NeuroCI — Multi-Agent Debate.
-
-For LogicBug category (highest risk), two LLM calls generate competing patches.
-A third "judge" call picks the safer one, reducing hallucination.
-"""
-
 from __future__ import annotations
 
 import json
+from typing import Any, cast
 
 import structlog
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -25,7 +19,7 @@ from src.models import AgentState, PatchResult
 logger = structlog.get_logger()
 
 
-async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dict:
+async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dict[str, Any]:
     """Generate a patch from one debate agent."""
     get_settings()
     pe = state.parsed_error
@@ -44,11 +38,12 @@ async def _gen_agent_patch(state: AgentState, agent_id: int, temp: float) -> dic
             HumanMessage(content=user_prompt)]
     try:
         resp = await llm.ainvoke(msgs)
-        text = resp.content.strip()
+        resp_content = resp.content if isinstance(resp.content, str) else str(resp.content)
+        text = resp_content.strip()
         if text.startswith("```"):
             lines = [line for line in text.split("\n") if not line.strip().startswith("```")]
             text = "\n".join(lines).strip()
-        return json.loads(text)
+        return cast(dict[str, Any], json.loads(text))
     except Exception as e:
         logger.error(f"debate.agent_{agent_id}_error", error=str(e))
         return {}
@@ -85,7 +80,8 @@ async def debate_and_select(state: AgentState) -> AgentState:
     try:
         jr = await judge.ainvoke([SystemMessage(content=DEBATE_JUDGE_SYSTEM_PROMPT),
                                   HumanMessage(content=judge_prompt)])
-        text = jr.content.strip()
+        jr_content = jr.content if isinstance(jr.content, str) else str(jr.content)
+        text = jr_content.strip()
         if text.startswith("```"):
             lines = [line for line in text.split("\n") if not line.strip().startswith("```")]
             text = "\n".join(lines).strip()

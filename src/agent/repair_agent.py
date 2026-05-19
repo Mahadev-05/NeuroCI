@@ -20,7 +20,7 @@ from src.agent.classifier import classify_failure
 from src.agent.debate import debate_and_select
 from src.agent.patch_generator import generate_patch, retry_patch
 from src.agent.validator import validate_patch
-from src.config import get_settings
+from src.config import Settings, get_settings
 from src.memory.vector_store import VectorStore
 from src.metrics.prometheus import (
     MTTR_HISTOGRAM,
@@ -67,7 +67,8 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
             logger.info("repair.step.1_log_extraction", run_id=state.run_id)
             state = await extract_and_parse_logs(state)
 
-        if not state.parsed_error or not state.parsed_error.raw_log:
+        parsed_error = state.parsed_error
+        if not parsed_error or not parsed_error.raw_log:
             state.result = RepairResult(
                 success=False, action_taken="skipped",
                 error_message="Could not retrieve CI logs",
@@ -77,11 +78,11 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
 
         # ── Step 1b: Deduplication by error signature ──
         import hashlib
-        error_hash = hashlib.md5(state.parsed_error.raw_log.encode("utf-8")).hexdigest()
+        error_hash = hashlib.md5(parsed_error.raw_log.encode("utf-8")).hexdigest()
         logger.info("repair.check_signature", run_id=state.run_id, error_hash=error_hash)
 
         try:
-            r = redis_lib.from_url(settings.redis_url)
+            r = redis_lib.from_url(settings.redis_url)  # type: ignore[no-untyped-call]
             dup_data_raw = r.get(f"neuroci:signature:{error_hash}")
             if dup_data_raw:
                 dup_data = json.loads(dup_data_raw)
@@ -143,17 +144,17 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
         with StageTimer("rag_lookup"):
             logger.info("repair.step.4_rag_lookup", run_id=state.run_id)
             state.similar_fixes = await vector_store.find_similar(
-                state.parsed_error.raw_log[:2000], top_k=3
+                parsed_error.raw_log[:2000], top_k=3
             )
 
         # ── Step 5: Fetch erroring file from GitHub ──
-        if state.parsed_error.file_path:
+        if parsed_error.file_path:
             with StageTimer("fetch_file"):
                 logger.info("repair.step.5_fetch_file", run_id=state.run_id,
-                            file=state.parsed_error.file_path)
+                            file=parsed_error.file_path)
                 state.file_content = await github.get_file_content(
                     state.repo_full_name,
-                    state.parsed_error.file_path,
+                    parsed_error.file_path,
                     ref=state.head_sha,
                 ) or ""
 
@@ -186,10 +187,15 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                 if state.retry_count < 1:
                     state.retry_count += 1
                     logger.info("repair.step.7_retry", run_id=state.run_id)
+                    
+                    # Safely extract previous diff
+                    current_patch = state.patch
+                    prev_diff = current_patch.unified_diff if current_patch else ""
+                    
                     state = await retry_patch(
                         state,
                         validation_error="\n".join(state.validation_errors),
-                        previous_diff=state.patch.unified_diff,
+                        previous_diff=prev_diff,
                     )
                     state = await validate_patch(state)
 
@@ -219,6 +225,10 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
             return state
 
         # ── Step 9: Route — auto-PR or Slack approval ──
+        current_patch = state.patch
+        if not current_patch:
+            raise ValueError("Patch is missing")
+
         threshold = settings.neuroci_confidence_threshold
         if settings.dry_run:
             logger.info("repair.step.9_dry_run", run_id=state.run_id)
@@ -227,10 +237,10 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                 success=True, action_taken="slack_approval",
                 category=state.category, patch=state.patch,
             )
-        elif state.patch.confidence >= threshold:
+        elif current_patch.confidence >= threshold:
             with StageTimer("auto_pr"):
                 logger.info("repair.step.9_auto_pr", run_id=state.run_id,
-                            confidence=state.patch.confidence)
+                            confidence=current_patch.confidence)
                 pr_data = await _create_fix_pr(github, state)
                 pr_url = pr_data.get("html_url", "")
                 state.result = RepairResult(
@@ -241,7 +251,7 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
                 await send_pr_created(state, pr_url)
         else:
             logger.info("repair.step.9_slack_approval", run_id=state.run_id,
-                        confidence=state.patch.confidence)
+                        confidence=current_patch.confidence)
             # Cache state in Redis for Slack "Apply Fix" button
             await _cache_state_to_redis(state, settings)
             await send_fix_notification(state)
@@ -256,11 +266,11 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
             track_repair_attempt(state)
 
             # Store the fix attempt in ChromaDB for RAG learning
-            if state.patch and state.parsed_error:
+            if current_patch and parsed_error:
                 outcome = "auto_pr" if state.result and state.result.action_taken == "auto_pr" else "pending"
                 await vector_store.store_fix(
-                    failure_log=state.parsed_error.raw_log[:4000],
-                    fix_diff=state.patch.unified_diff[:4000],
+                    failure_log=parsed_error.raw_log[:4000],
+                    fix_diff=current_patch.unified_diff[:4000],
                     category=state.category.value,
                     outcome=outcome,
                     repo=state.repo_full_name,
@@ -285,10 +295,10 @@ async def run_repair_pipeline(state: AgentState) -> AgentState:
     return state
 
 
-async def _cache_state_to_redis(state: AgentState, settings) -> None:
+async def _cache_state_to_redis(state: AgentState, settings: Settings) -> None:
     """Cache agent state in Redis for the Slack 'Apply Fix' flow."""
     try:
-        r = redis_lib.from_url(settings.redis_url)
+        r = redis_lib.from_url(settings.redis_url)  # type: ignore[no-untyped-call]
         state_json = json.dumps(state.model_dump(), default=str)
         # Cache for 24 hours
         r.setex(f"neuroci:state:{state.run_id}", 86400, state_json)
@@ -342,12 +352,13 @@ async def _create_fix_pr(github: GitHubClient, state: AgentState) -> dict[str, A
     )
 
     # Cache error signature in Redis if raw log exists
-    if state.parsed_error and state.parsed_error.raw_log:
+    parsed_error = state.parsed_error
+    if parsed_error and parsed_error.raw_log:
         import hashlib
-        error_hash = hashlib.md5(state.parsed_error.raw_log.encode("utf-8")).hexdigest()
+        error_hash = hashlib.md5(parsed_error.raw_log.encode("utf-8")).hexdigest()
         try:
             settings = get_settings()
-            r = redis_lib.from_url(settings.redis_url)
+            r = redis_lib.from_url(settings.redis_url)  # type: ignore[no-untyped-call]
             val = json.dumps({
                 "pr_number": pr_data.get("number"),
                 "pr_url": pr_data.get("html_url"),

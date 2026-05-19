@@ -52,10 +52,11 @@ def get_chat_llm(
 
     elif provider == "groq":
         from langchain_groq import ChatGroq
+        from pydantic import SecretStr
 
         return ChatGroq(
             model=settings.groq_model,
-            api_key=settings.groq_api_key,
+            api_key=SecretStr(settings.groq_api_key) if settings.groq_api_key else None,
             temperature=temperature,
             max_tokens=max_tokens,
         )
@@ -72,12 +73,13 @@ def get_chat_llm(
 
     elif provider == "openai":
         from langchain_openai import ChatOpenAI
+        from pydantic import SecretStr
 
         return ChatOpenAI(
             model=settings.openai_model,
-            api_key=settings.openai_api_key,
+            api_key=SecretStr(settings.openai_api_key) if settings.openai_api_key else None,
             temperature=temperature,
-            max_tokens=max_tokens,
+            max_tokens=max_tokens,  # type: ignore[call-arg]
         )
 
     else:
@@ -101,7 +103,7 @@ def get_embeddings(provider: LLMProvider | None = None) -> Embeddings:
 
         return GoogleGenerativeAIEmbeddings(
             model=settings.gemini_embedding_model,
-            google_api_key=settings.gemini_api_key,
+            google_api_key=settings.gemini_api_key,  # type: ignore[call-arg]
         )
 
     elif provider in ("groq", "ollama"):
@@ -114,10 +116,11 @@ def get_embeddings(provider: LLMProvider | None = None) -> Embeddings:
 
     elif provider == "openai":
         from langchain_openai import OpenAIEmbeddings
+        from pydantic import SecretStr
 
         return OpenAIEmbeddings(
             model=settings.openai_embedding_model,
-            api_key=settings.openai_api_key,
+            api_key=SecretStr(settings.openai_api_key) if settings.openai_api_key else None,
         )
 
     else:

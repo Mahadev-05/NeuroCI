@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+from typing import Any, cast
 
 import structlog
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -48,7 +49,7 @@ def _build_few_shot_section(state: AgentState) -> str:
     return FEW_SHOT_TEMPLATE.format(examples="\n".join(examples))
 
 
-def _parse_llm_response(response_text: str) -> dict:
+def _parse_llm_response(response_text: str) -> dict[str, Any]:
     """Parse LLM JSON response, handling markdown code blocks and conversational wrapper."""
     text = response_text.strip()
 
@@ -63,11 +64,14 @@ def _parse_llm_response(response_text: str) -> dict:
         if start != -1 and end != -1 and end > start:
             text = text[start:end+1].strip()
 
-    return json.loads(text)
+    return cast(dict[str, Any], json.loads(text))
 
 
-async def decide_assertion_fix_target(state: AgentState) -> dict:
+async def decide_assertion_fix_target(state: AgentState) -> dict[str, Any]:
     """Decide whether to fix the test or the source code for TestAssertion failures."""
+    if not state.parsed_error:
+        raise ValueError("parsed_error is required")
+
     llm = get_chat_llm(temperature=0.1, max_tokens=500)
 
     prompt = f"""\
@@ -94,13 +98,14 @@ Analyze the test failure below. Decide whether we should fix the IMPLEMENTATION 
 
     try:
         response = await llm.ainvoke(messages)
-        return _parse_llm_response(response.content)
+        content = response.content if isinstance(response.content, str) else str(response.content)
+        return _parse_llm_response(content)
     except Exception as e:
         logger.error("patch_generator.decide_target_error", error=str(e))
         return {"fix_target": "test", "target_file": state.parsed_error.file_path, "reasoning": "Fallback to test file"}
 
 
-async def validate_pypi_package(package: str, version: str = None) -> str | None:
+async def validate_pypi_package(package: str, version: str | None = None) -> str | None:
     """Validate package and version on PyPI. Returns the valid version to use, or None."""
     import httpx
     url = f"https://pypi.org/pypi/{package}/json"
@@ -114,13 +119,16 @@ async def validate_pypi_package(package: str, version: str = None) -> str | None
             if version:
                 if version in releases:
                     return version
-            return data.get("info", {}).get("version")
+            return cast(str | None, data.get("info", {}).get("version"))
         except Exception:
             return None
 
 
-async def extract_dependency_info(state: AgentState) -> dict:
+async def extract_dependency_info(state: AgentState) -> dict[str, Any]:
     """Extract package name and version from dependency error log."""
+    if not state.parsed_error:
+        raise ValueError("parsed_error is required")
+
     llm = get_chat_llm(temperature=0.1, max_tokens=150)
     prompt = f"""\
 Analyze the dependency conflict or import error below. Extract the name of the package that needs to be added, updated, or fixed, and a proposed version.
@@ -143,7 +151,8 @@ Respond with ONLY a JSON object:
     ]
     try:
         response = await llm.ainvoke(messages)
-        return _parse_llm_response(response.content)
+        content = response.content if isinstance(response.content, str) else str(response.content)
+        return _parse_llm_response(content)
     except Exception as e:
         logger.error("patch_generator.extract_dependency_error", error=str(e))
         return {}
@@ -166,7 +175,8 @@ async def generate_patch(state: AgentState) -> AgentState:
     """
     get_settings()
 
-    if not state.parsed_error:
+    parsed_error = state.parsed_error
+    if not parsed_error:
         logger.warning("patch_generator.no_error", run_id=state.run_id)
         return state
 
@@ -175,9 +185,9 @@ async def generate_patch(state: AgentState) -> AgentState:
     if state.category == FailureCategory.TEST_ASSERTION:
         target_info = await decide_assertion_fix_target(state)
         target_file = target_info.get("target_file")
-        if target_file and target_file != state.parsed_error.file_path:
-            logger.info("patch_generator.assertion_target_changed", original=state.parsed_error.file_path, new=target_file, reasoning=target_info.get("reasoning"))
-            state.parsed_error.file_path = target_file
+        if target_file and target_file != parsed_error.file_path:
+            logger.info("patch_generator.assertion_target_changed", original=parsed_error.file_path, new=target_file, reasoning=target_info.get("reasoning"))
+            parsed_error.file_path = target_file
 
             # Fetch the new target file content
             from src.pipeline.github_client import GitHubClient
@@ -209,12 +219,12 @@ async def generate_patch(state: AgentState) -> AgentState:
                     valid_ver = await validate_pypi_package(pkg_name, proposed_ver)
                     if valid_ver:
                         logger.info("patch_generator.dependency_verified", package=pkg_name, version=valid_ver)
-                        state.parsed_error.file_path = "requirements.txt"
-                        state.parsed_error.language = "requirements"
+                        parsed_error.file_path = "requirements.txt"
+                        parsed_error.language = "requirements"
                         state.file_content = req_content
                         state.file_contents["requirements.txt"] = req_content
                         # We also update error message slightly so LLM knows exactly what version is verified
-                        state.parsed_error.error_message = f"Add or update package '{pkg_name}' to version '{valid_ver}' in requirements.txt. PyPI validation successful."
+                        parsed_error.error_message = f"Add or update package '{pkg_name}' to version '{valid_ver}' in requirements.txt. PyPI validation successful."
         except Exception as e:
             logger.error("patch_generator.dependency_handling_failed", error=str(e))
         finally:
@@ -226,11 +236,11 @@ async def generate_patch(state: AgentState) -> AgentState:
     # ── Build user prompt ──
     user_prompt = REPAIR_USER_PROMPT.format(
         category=state.category.value,
-        file_path=state.parsed_error.file_path,
-        error_type=state.parsed_error.error_type,
-        error_message=state.parsed_error.error_message,
-        log_excerpt=state.parsed_error.raw_log[:6000],
-        language=state.parsed_error.language,
+        file_path=parsed_error.file_path,
+        error_type=parsed_error.error_type,
+        error_message=parsed_error.error_message,
+        log_excerpt=parsed_error.raw_log[:6000],
+        language=parsed_error.language,
         file_content=state.file_content[:8000] if state.file_content else "[File content not available]",
         few_shot_section=few_shot_section,
     )
@@ -245,14 +255,15 @@ async def generate_patch(state: AgentState) -> AgentState:
 
     try:
         response = await llm.ainvoke(messages)
-        result = _parse_llm_response(response.content)
+        content = response.content if isinstance(response.content, str) else str(response.content)
+        result = _parse_llm_response(content)
 
         patches_list = []
         if "patches" in result:
             for p in result["patches"]:
                 patches_list.append(
                     FilePatch(
-                        target_file=p.get("target_file", state.parsed_error.file_path),
+                        target_file=p.get("target_file", parsed_error.file_path),
                         unified_diff=p.get("unified_diff", ""),
                         lines_changed=int(p.get("lines_changed", 0))
                     )
@@ -260,7 +271,7 @@ async def generate_patch(state: AgentState) -> AgentState:
         else:
             patches_list.append(
                 FilePatch(
-                    target_file=result.get("target_file", state.parsed_error.file_path),
+                    target_file=result.get("target_file", parsed_error.file_path),
                     unified_diff=result.get("unified_diff", ""),
                     lines_changed=int(result.get("lines_changed", 0))
                 )
@@ -302,14 +313,15 @@ async def retry_patch(
     """
     get_settings()
 
-    if not state.parsed_error:
+    parsed_error = state.parsed_error
+    if not parsed_error:
         return state
 
     user_prompt = RETRY_USER_PROMPT.format(
-        file_path=state.parsed_error.file_path,
+        file_path=parsed_error.file_path,
         validation_error=validation_error,
         previous_diff=previous_diff,
-        language=state.parsed_error.language,
+        language=parsed_error.language,
         file_content=state.file_content[:8000] if state.file_content else "",
     )
 
@@ -322,14 +334,15 @@ async def retry_patch(
 
     try:
         response = await llm.ainvoke(messages)
-        result = _parse_llm_response(response.content)
+        content = response.content if isinstance(response.content, str) else str(response.content)
+        result = _parse_llm_response(content)
 
         patches_list = []
         if "patches" in result:
             for p in result["patches"]:
                 patches_list.append(
                     FilePatch(
-                        target_file=p.get("target_file", state.parsed_error.file_path),
+                        target_file=p.get("target_file", parsed_error.file_path),
                         unified_diff=p.get("unified_diff", ""),
                         lines_changed=int(p.get("lines_changed", 0))
                     )
@@ -337,7 +350,7 @@ async def retry_patch(
         else:
             patches_list.append(
                 FilePatch(
-                    target_file=result.get("target_file", state.parsed_error.file_path),
+                    target_file=result.get("target_file", parsed_error.file_path),
                     unified_diff=result.get("unified_diff", ""),
                     lines_changed=int(result.get("lines_changed", 0))
                 )
