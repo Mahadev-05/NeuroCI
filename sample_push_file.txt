@@ -1,0 +1,9 @@
+This is a sample file for the neuroci-demo repository.
+
+Use this file to create a small commit and push to GitHub:
+
+    git add sample_push_file.txt
+    git commit -m "Add sample push file for neuroci-demo"
+    git push
+
+This simple change is useful for triggering webhook delivery and verifying your repository integration.
