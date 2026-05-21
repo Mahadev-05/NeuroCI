@@ -19,6 +19,9 @@ import structlog
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 
+from src.ci.analyzer import analyze_workflow_failure
+from src.ci.remediator import process_remediation
+from src.ci.storage import save_failure_analysis
 from src.config import get_settings
 from src.metrics.prometheus import track_webhook
 from src.models import (
@@ -80,6 +83,15 @@ async def receive_webhook(request: Request) -> WebhookResponse | JSONResponse:
 
     # ── Step 2: Detect event type ──
     event_type = request.headers.get("X-GitHub-Event", "")
+    delivery_id = request.headers.get("X-GitHub-Delivery", "unknown")
+    logger.info(
+        "webhook.received",
+        github_event=event_type,
+        delivery_id=delivery_id,
+        payload_size=len(body),
+        verification_status="passed",
+        remote_addr=request.client.host if request.client else "unknown",
+    )
 
     # ── Step 3: Parse payload ──
     try:
@@ -92,10 +104,34 @@ async def receive_webhook(request: Request) -> WebhookResponse | JSONResponse:
         )
 
     # ── Route by event type ──
+    if event_type == "ping":
+        logger.info(
+            "webhook.ping_received",
+            delivery=request.headers.get("X-GitHub-Delivery", "unknown"),
+            repo=raw.get("repository", {}).get("full_name", "unknown"),
+        )
+        return WebhookResponse(
+            accepted=True,
+            message="GitHub ping event received",
+            run_id=None,
+        )
+    if event_type == "push":
+        return await _handle_push_event(raw)
     if event_type == "pull_request":
         return await _handle_pull_request_event(raw)
-    else:
+    if event_type == "workflow_run":
         return await _handle_workflow_run_event(raw, settings)
+
+    logger.warning(
+        "webhook.unhandled_event",
+        event_type=event_type or "missing",
+        repo=raw.get("repository", {}).get("full_name", "unknown"),
+    )
+    return WebhookResponse(
+        accepted=False,
+        message=f"Ignoring unsupported GitHub event type: {event_type or 'missing'}",
+        run_id=None,
+    )
 
 
 async def _handle_workflow_run_event(
@@ -155,11 +191,6 @@ async def _handle_workflow_run_event(
             run_id=run.id,
         )
 
-    # ── Check if this is a SECOND failure after a NeuroCI fix ──
-    verification = _check_pending_verification(repo.full_name, run.head_branch)
-    if verification:
-        return await _handle_verification_failure(verification, run, repo, settings)
-
     # ── Repo allowlist ──
     if not settings.is_repo_allowed(repo.full_name):
         logger.warning(
@@ -182,34 +213,52 @@ async def _handle_workflow_run_event(
             run_id=run.id,
         )
 
-    # ── Create agent state and dispatch ──
-    agent_state = AgentState(
-        run_id=run.id,
-        repo_full_name=repo.full_name,
-        head_branch=run.head_branch,
-        head_sha=run.head_sha,
-        workflow_name=run.name,
-        run_url=run.html_url,
-    )
+    analysis = analyze_workflow_failure(raw)
+    save_failure_analysis(analysis)
 
     logger.info(
-        "webhook.accepted",
-        run_id=run.id,
-        repo=repo.full_name,
-        branch=run.head_branch,
-        sha=run.head_sha[:8],
-        workflow=run.name,
+        "ci.failure_analysis.generated",
+        run_id=analysis.run_id,
+        repo=analysis.repository,
+        workflow=analysis.workflow_name,
+        failed_job=analysis.failed_job,
+        branch=analysis.branch,
+        commit_sha=analysis.commit_sha[:8],
+        conclusion=analysis.conclusion,
+        logs_url=analysis.logs_url,
+        failure_type=analysis.failure_type,
+        summary=analysis.summary,
+        remediation_suggestions=analysis.remediation_suggestions,
     )
 
-    # Dispatch to Celery task queue
-    from src.tasks.repair_task import process_failure
-
-    process_failure.delay(agent_state.model_dump())
+    remediation = process_remediation(analysis, settings)
 
     return WebhookResponse(
         accepted=True,
-        message="Failure detected — repair task queued",
+        message=f"CI failure analyzed: {analysis.failure_type}; remediation {remediation.status}",
         run_id=run.id,
+    )
+
+
+async def _handle_push_event(raw: dict) -> WebhookResponse:
+    """Handle push events for repository update notifications."""
+    repo = raw.get("repository", {}).get("full_name", "unknown")
+    ref = raw.get("ref", "unknown")
+    commit = raw.get("after", "")
+    pusher = raw.get("pusher", {}).get("name", "unknown")
+
+    logger.info(
+        "webhook.push_received",
+        repo=repo,
+        ref=ref,
+        commit=commit[:8],
+        pusher=pusher,
+    )
+
+    return WebhookResponse(
+        accepted=True,
+        message=f"Push event received for {repo} on {ref} by {pusher}",
+        run_id=None,
     )
 
 

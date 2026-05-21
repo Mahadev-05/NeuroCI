@@ -196,6 +196,78 @@ class WebhookResponse(BaseModel):
     run_id: int | None = None
 
 
+class CIFailureAnalysis(BaseModel):
+    """Human-readable analysis of a failed GitHub Actions workflow run."""
+
+    run_id: int
+    repository: str
+    workflow_name: str
+    failed_job: str = "unknown"
+    branch: str
+    commit_sha: str
+    conclusion: str
+    run_url: str = ""
+    logs_url: str = ""
+    failure_type: str = "unknown"
+    summary: str
+    remediation_suggestions: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class CIFailureListResponse(BaseModel):
+    """API response for recent CI failure analyses."""
+
+    failures: list[CIFailureAnalysis] = Field(default_factory=list)
+    count: int = 0
+
+
+class CIRemediationPatch(BaseModel):
+    """A deterministic file update proposed by NeuroCI."""
+
+    file_path: str
+    new_content: str
+    explanation: str
+
+
+class CIRemediationPlan(BaseModel):
+    """Safe remediation plan before GitHub writes happen."""
+
+    run_id: int
+    repository: str
+    base_branch: str
+    branch_name: str
+    failure_type: str
+    remediation_summary: str
+    commit_message: str
+    pr_title: str
+    pr_body: str
+    patches: list[CIRemediationPatch] = Field(default_factory=list)
+
+
+class CIRemediationRecord(BaseModel):
+    """Stored remediation attempt history."""
+
+    run_id: int
+    repository: str
+    failure_type: str
+    status: str
+    branch_name: str = ""
+    pr_url: str = ""
+    pr_number: int | None = None
+    dry_run: bool = True
+    reason: str = ""
+    remediation_summary: str = ""
+    files_changed: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class CIRemediationListResponse(BaseModel):
+    """API response for recent remediation attempts."""
+
+    remediations: list[CIRemediationRecord] = Field(default_factory=list)
+    count: int = 0
+
+
 class MetricsSnapshot(BaseModel):
     """Point-in-time metrics for API consumers."""
     total_failures_processed: int = 0

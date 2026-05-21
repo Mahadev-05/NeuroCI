@@ -22,6 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 
+from src.ci.router import router as ci_router
 from src.config import get_settings
 from src.metrics.prometheus import (
     FIXES_TOTAL,
@@ -103,6 +104,7 @@ app.mount("/metrics", metrics_app)
 
 # ── Register Routers ──────────────────────────────────────
 app.include_router(webhook_router, prefix="/api/v1", tags=["Webhooks"])
+app.include_router(ci_router, prefix="/api/v1", tags=["CI Failure Monitoring"])
 
 
 # ── Health Check ───────────────────────────────────────────

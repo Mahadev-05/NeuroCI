@@ -66,6 +66,10 @@ class TestWebhookIntegration:
             s.chroma_host = "localhost"
             s.chroma_port = 8000
             s.opa_url = "http://localhost:8181"
+            s.ci_failure_store_path = "data/ci_failures.json"
+            s.ci_remediation_store_path = "data/ci_remediations.json"
+            s.github_remediation_enabled = False
+            s.github_remediation_dry_run = True
             s.is_repo_allowed.return_value = True
             ms.return_value = s
             from fastapi.testclient import TestClient
@@ -114,6 +118,113 @@ class TestWebhookIntegration:
         data = resp.json()
         assert data["accepted"] is False
 
+    def test_failed_workflow_generates_ci_analysis(self):
+        """Failed completed workflow_run events should be analyzed."""
+        payload = {**VALID_WORKFLOW_RUN}
+        payload["workflow_run"] = {
+            **VALID_WORKFLOW_RUN["workflow_run"],
+            "name": "pytest",
+            "logs_url": "https://api.github.com/repos/owner/repo/actions/runs/12345/logs",
+            "jobs": [{"name": "unit tests", "conclusion": "failure"}],
+        }
+        body = json.dumps(payload).encode()
+        sig = _sign(payload, WEBHOOK_SECRET)
+
+        client = self._get_client()
+        with (
+            patch("src.webhook.receiver._is_duplicate", return_value=False),
+            patch("src.webhook.receiver.save_failure_analysis") as save_analysis,
+            patch("src.webhook.receiver.process_remediation") as process_remediation,
+        ):
+            process_remediation.return_value.status = "skipped"
+            resp = client.post(
+                "/api/v1/webhook/github",
+                content=body,
+                headers={
+                    "X-Hub-Signature-256": sig,
+                    "X-GitHub-Event": "workflow_run",
+                    "Content-Type": "application/json",
+                },
+            )
+
+        assert resp.status_code == 202
+        data = resp.json()
+        assert data["accepted"] is True
+        assert data["message"] == "CI failure analyzed: pytest failed; remediation skipped"
+        save_analysis.assert_called_once()
+        process_remediation.assert_called_once()
+        analysis = save_analysis.call_args.args[0]
+        assert analysis.workflow_name == "pytest"
+        assert analysis.failed_job == "unit tests"
+        assert analysis.repository == "owner/repo"
+
+    def test_malformed_workflow_payload_returns_400(self):
+        """Malformed workflow_run payloads should fail safely."""
+        payload = {"action": "completed", "repository": {"full_name": "owner/repo"}}
+        body = json.dumps(payload).encode()
+        sig = _sign(payload, WEBHOOK_SECRET)
+
+        client = self._get_client()
+        resp = client.post(
+            "/api/v1/webhook/github",
+            content=body,
+            headers={
+                "X-Hub-Signature-256": sig,
+                "X-GitHub-Event": "workflow_run",
+                "Content-Type": "application/json",
+            },
+        )
+
+        assert resp.status_code == 400
+        assert resp.json()["accepted"] is False
+
+    def test_push_event_parses_and_accepts(self):
+        """Push events should be accepted and logged."""
+        payload = {
+            "ref": "refs/heads/main",
+            "after": "abc123def456",
+            "repository": {"full_name": "owner/repo"},
+            "pusher": {"name": "test-user"},
+        }
+        body = json.dumps(payload).encode()
+        sig = _sign(payload, WEBHOOK_SECRET)
+
+        client = self._get_client()
+        resp = client.post(
+            "/api/v1/webhook/github",
+            content=body,
+            headers={
+                "X-Hub-Signature-256": sig,
+                "X-GitHub-Event": "push",
+                "Content-Type": "application/json",
+            },
+        )
+        assert resp.status_code == 202
+        data = resp.json()
+        assert data["accepted"] is True
+        assert "Push event received" in data["message"]
+
+    def test_ping_event_returns_ok(self):
+        """Ping events from GitHub should be accepted."""
+        payload = {"zen": "Keep it logically awesome", "repository": {"full_name": "owner/repo"}}
+        body = json.dumps(payload).encode()
+        sig = _sign(payload, WEBHOOK_SECRET)
+
+        client = self._get_client()
+        resp = client.post(
+            "/api/v1/webhook/github",
+            content=body,
+            headers={
+                "X-Hub-Signature-256": sig,
+                "X-GitHub-Event": "ping",
+                "Content-Type": "application/json",
+            },
+        )
+        assert resp.status_code == 202
+        data = resp.json()
+        assert data["accepted"] is True
+        assert "GitHub ping event" in data["message"]
+
 
 class TestPRWebhook:
     """Test PR feedback webhook."""
@@ -139,6 +250,10 @@ class TestHealthEndpoints:
             s.chroma_host = "localhost"
             s.chroma_port = 8000
             s.opa_url = "http://localhost:8181"
+            s.ci_failure_store_path = "data/ci_failures.json"
+            s.ci_remediation_store_path = "data/ci_remediations.json"
+            s.github_remediation_enabled = False
+            s.github_remediation_dry_run = True
             ms.return_value = s
             from fastapi.testclient import TestClient
 
@@ -158,3 +273,64 @@ class TestHealthEndpoints:
         resp = client.get("/")
         assert resp.status_code == 200
         assert resp.json()["service"] == "NeuroCI"
+
+
+class TestCIFailureEndpoint:
+    """Test CI failure monitoring API."""
+
+    def test_ci_failures_endpoint(self):
+        from datetime import datetime
+
+        from fastapi.testclient import TestClient
+
+        from src.main import app
+        from src.models import CIFailureAnalysis
+
+        failure = CIFailureAnalysis(
+            run_id=12345,
+            repository="owner/repo",
+            workflow_name="pytest",
+            failed_job="unit tests",
+            branch="main",
+            commit_sha="abc123",
+            conclusion="failure",
+            failure_type="pytest failed",
+            summary="pytest failed on main",
+            remediation_suggestions=["Run pytest locally."],
+            created_at=datetime.utcnow(),
+        )
+
+        with patch("src.ci.router.list_failure_analyses", return_value=[failure]):
+            client = TestClient(app)
+            resp = client.get("/api/v1/ci/failures")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] == 1
+        assert data["failures"][0]["run_id"] == 12345
+        assert data["failures"][0]["failure_type"] == "pytest failed"
+
+    def test_ci_remediations_endpoint(self):
+        from fastapi.testclient import TestClient
+
+        from src.main import app
+        from src.models import CIRemediationRecord
+
+        record = CIRemediationRecord(
+            run_id=12345,
+            repository="owner/repo",
+            failure_type="dependency missing",
+            status="dry_run",
+            branch_name="neuroci/autofix-12345-repo-dependency-missing",
+            dry_run=True,
+            files_changed=["requirements.txt"],
+        )
+
+        with patch("src.ci.router.list_remediation_records", return_value=[record]):
+            client = TestClient(app)
+            resp = client.get("/api/v1/ci/remediations")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] == 1
+        assert data["remediations"][0]["status"] == "dry_run"

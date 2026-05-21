@@ -36,6 +36,8 @@ async def verify_github_signature(request: Request) -> bytes:
         logger.warning(
             "webhook.security.missing_signature",
             remote_addr=request.client.host if request.client else "unknown",
+            github_event=request.headers.get("X-GitHub-Event", "unknown"),
+            delivery_id=request.headers.get("X-GitHub-Delivery", "unknown"),
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -55,19 +57,42 @@ async def verify_github_signature(request: Request) -> bytes:
         ).hexdigest()
     )
 
+    # ── Validate header format first ──
+    if not signature_header.startswith("sha256="):
+        logger.warning(
+            "webhook.security.invalid_signature_format",
+            remote_addr=request.client.host if request.client else "unknown",
+            received=signature_header,
+            github_event=request.headers.get("X-GitHub-Event", "unknown"),
+            delivery_id=request.headers.get("X-GitHub-Delivery", "unknown"),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid X-Hub-Signature-256 header format",
+        )
+
     # ── Constant-time comparison ──
     if not hmac.compare_digest(expected_signature, signature_header):
         logger.warning(
             "webhook.security.invalid_signature",
             remote_addr=request.client.host if request.client else "unknown",
             received=signature_header[:20] + "...",
+            expected_length=len(expected_signature),
+            github_event=request.headers.get("X-GitHub-Event", "unknown"),
+            delivery_id=request.headers.get("X-GitHub-Delivery", "unknown"),
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid webhook signature",
         )
 
-    logger.info("webhook.security.verified", payload_size=len(body))
+    logger.info(
+        "webhook.security.verified",
+        payload_size=len(body),
+        github_event=request.headers.get("X-GitHub-Event", "unknown"),
+        delivery_id=request.headers.get("X-GitHub-Delivery", "unknown"),
+        verification_status="passed",
+    )
     return body
 
 

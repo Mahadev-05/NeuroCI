@@ -11,7 +11,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        str_strip_whitespace=True,
     )
 
     # ── GitHub ──────────────────────────────────────────────
@@ -95,6 +96,22 @@ class Settings(BaseSettings):
         default="infra/,terraform/,secrets.py,auth.py,.env",
         description="Comma-separated file paths NeuroCI is never allowed to modify",
     )
+    ci_failure_store_path: str = Field(
+        "data/ci_failures.json",
+        description="Local JSON file used to store recent CI failure analyses",
+    )
+    ci_remediation_store_path: str = Field(
+        "data/ci_remediations.json",
+        description="Local JSON file used to store remediation attempts",
+    )
+    github_remediation_enabled: bool = Field(
+        False,
+        description="Enable automatic remediation branch and pull request creation",
+    )
+    github_remediation_dry_run: bool = Field(
+        True,
+        description="Generate remediation plans without writing branches or pull requests",
+    )
 
     @property
     def restricted_paths_list(self) -> list[str]:
@@ -127,6 +144,13 @@ class Settings(BaseSettings):
     def is_path_restricted(self, file_path: str) -> bool:
         """Check if a file path is in the restricted list."""
         return any(file_path.startswith(rp) or file_path.endswith(rp) for rp in self.restricted_paths_list)
+
+    @field_validator("github_webhook_secret", mode="before")
+    @classmethod
+    def trim_webhook_secret(cls, value: str) -> str:
+        if isinstance(value, str):
+            return value.strip()
+        return value
 
 
 @lru_cache

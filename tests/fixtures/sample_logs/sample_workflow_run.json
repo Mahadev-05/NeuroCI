@@ -1,0 +1,19 @@
+{
+  "action": "completed",
+  "workflow_run": {
+    "id": 12345,
+    "name": "CI",
+    "head_branch": "feature/demo-failure",
+    "head_sha": "abc123def4567890abcdef1234567890abcdef12",
+    "conclusion": "failure",
+    "html_url": "https://github.com/owner/repo/actions/runs/12345",
+    "run_attempt": 1,
+    "logs_url": ""
+  },
+  "repository": {
+    "id": 1,
+    "full_name": "owner/repo",
+    "html_url": "https://github.com/owner/repo",
+    "default_branch": "main"
+  }
+}

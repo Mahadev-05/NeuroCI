@@ -38,6 +38,8 @@ coverage.xml
 
 # ── ChromaDB local data ──
 chroma_data/
+data/ci_failures.json
+data/ci_remediations.json
 
 # ── Terraform ──
 terraform/.terraform/

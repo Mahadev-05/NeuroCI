@@ -1,0 +1,225 @@
+﻿neuroci-worker   |  
+neuroci-worker   |  -------------- celery@9f95139d8704 v5.6.3 (recovery)
+neuroci-worker   | --- ***** ----- 
+neuroci-worker   | -- ******* ---- Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.41 2026-05-19 18:13:47
+neuroci-worker   | - *** --- * --- 
+neuroci-worker   | - ** ---------- [config]
+neuroci-worker   | - ** ---------- .> app:         neuroci:0x779239885890
+neuroci-worker   | - ** ---------- .> transport:   redis://redis:6379/0
+neuroci-worker   | - ** ---------- .> results:     redis://redis:6379/0
+neuroci-worker   | - *** --- * --- .> concurrency: 2 (prefork)
+neuroci-worker   | -- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+neuroci-worker   | --- ***** ----- 
+neuroci-worker   |  -------------- [queues]
+neuroci-worker   |                 .> celery           exchange=celery(direct) key=celery
+neuroci-worker   |                 
+neuroci-worker   | 
+neuroci-worker   | [tasks]
+neuroci-worker   |   . neuroci.apply_approved_fix
+neuroci-worker   |   . neuroci.process_failure
+neuroci-worker   |   . neuroci.store_feedback
+neuroci-worker   | 
+neuroci-worker   | [2026-05-19 18:13:48,584: INFO/MainProcess] Connected to redis://redis:6379/0
+neuroci-worker   | [2026-05-19 18:13:48,601: INFO/MainProcess] mingle: searching for neighbors
+neuroci-worker   | [2026-05-19 18:13:49,642: INFO/MainProcess] mingle: all alone
+neuroci-worker   | [2026-05-19 18:13:49,694: INFO/MainProcess] celery@9f95139d8704 ready.
+neuroci-webhook  | INFO:     172.18.0.4:35586 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:35586 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:40132 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:40132 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:36842 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:36842 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:53994 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49572 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49572 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:54762 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:54762 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:36696 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:36696 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:51736 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:51736 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:52400 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:52400 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:58394 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:58394 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:50252 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:50252 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:47764 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:47764 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:36828 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:36828 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:54626 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:54626 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38808 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38808 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:45232 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:57048 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:57048 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:46264 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:46264 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:42638 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:42638 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:44688 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:44688 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:48990 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:44728 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:44728 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:33130 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:33130 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:40622 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:40622 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:47458 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:35188 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:35188 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38044 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38044 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:59280 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:59280 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:48070 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:40866 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:40866 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:47600 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:47600 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:53912 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:53912 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:50448 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:44006 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:44006 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49576 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49576 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:60482 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:60482 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:58756 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34896 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34896 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:35782 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:35782 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:46082 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:46082 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:51378 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:51378 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:59788 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:37870 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:37870 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:39268 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:39268 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:56798 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:56798 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:33242 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:32924 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:32924 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:59136 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:59136 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49022 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49022 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:40438 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38112 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38112 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:59980 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:59980 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38398 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38398 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:54088 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34778 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34778 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34586 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34586 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:41436 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:41436 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:51820 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:51820 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:49950 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:43796 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:43796 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49914 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49914 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:50120 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:50120 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:49210 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49202 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49202 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:49394 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:49394 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:60686 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:60686 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:47178 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:55452 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:55452 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38172 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38172 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:56146 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:56146 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:57536 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:59224 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:59224 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:48670 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:48670 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:33878 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:33878 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:40888 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:59484 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:59484 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:41550 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:41550 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:38930 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:38930 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:56188 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:43494 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:43494 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:48848 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:48848 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:53142 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:53142 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:36884 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:36208 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:36208 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34730 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34730 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:44512 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:44512 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34416 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34416 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:41578 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:39878 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:39878 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:45008 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:45008 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:53906 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:53906 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:58894 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:55626 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:55626 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:46760 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:46760 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:51468 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:51468 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:55660 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:54046 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:54046 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:50936 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:50936 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:53812 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:53812 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:47896 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:41496 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:41496 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:35784 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:35784 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:35240 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:35240 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:59462 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:47118 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:47118 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:56904 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:56904 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:55108 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:55108 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     127.0.0.1:32776 - "GET /health HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:34194 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:34194 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:41812 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:41812 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:48864 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:48864 - "GET /metrics/ HTTP/1.1" 200 OK
+neuroci-webhook  | INFO:     172.18.0.4:56996 - "GET /metrics HTTP/1.1" 307 Temporary Redirect
+neuroci-webhook  | INFO:     172.18.0.4:56996 - "GET /metrics/ HTTP/1.1" 200 OK
